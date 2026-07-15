@@ -1,4 +1,4 @@
-# Live Abroad
+# Living Abroad
 
 AI 기반 맞춤형 해외 이주·비자 경로 추천 플랫폼
 
