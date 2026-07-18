@@ -1,0 +1,206 @@
+{
+  "modelVersion": "environment-kmeans-1.0.0",
+  "dataVersion": "2026-07-17",
+  "featureColumns": [
+    "log10_migrant_stock_2024",
+    "stock_growth_2020_2024_pct",
+    "female_share_2024_pct",
+    "inflow_growth_5y_pct",
+    "foreign_population_pct_latest",
+    "foreign_born_pct_latest",
+    "nationality_acquisition_rate_pct_latest",
+    "foreign_born_employment_rate_pct",
+    "foreign_born_high_education_share_pct"
+  ],
+  "k": 6,
+  "clusterTypeMap": {
+    "4": "고용·정착 최우수형",
+    "3": "고용·정착 우수형",
+    "2": "안정형",
+    "1": "성장형",
+    "5": "잠재형",
+    "0": "관찰필요형"
+  },
+  "countryScores": {
+    "AUS": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 49.42
+    },
+    "AUT": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 44.38
+    },
+    "BEL": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 44.19
+    },
+    "CAN": {
+      "cluster": 2,
+      "environmentType": "안정형",
+      "environmentScore": 53.59
+    },
+    "CHE": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 50.17
+    },
+    "CHL": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 34.68
+    },
+    "COL": {
+      "cluster": 0,
+      "environmentType": "관찰필요형",
+      "environmentScore": 37.29
+    },
+    "CZE": {
+      "cluster": 3,
+      "environmentType": "고용·정착 우수형",
+      "environmentScore": 46.12
+    },
+    "DEU": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 42.09
+    },
+    "DNK": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 38.46
+    },
+    "ESP": {
+      "cluster": 0,
+      "environmentType": "관찰필요형",
+      "environmentScore": 36.28
+    },
+    "EST": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 43.6
+    },
+    "FIN": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 38.83
+    },
+    "FRA": {
+      "cluster": 0,
+      "environmentType": "관찰필요형",
+      "environmentScore": 38.55
+    },
+    "GBR": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 42.63
+    },
+    "GRC": {
+      "cluster": 0,
+      "environmentType": "관찰필요형",
+      "environmentScore": 27.77
+    },
+    "HUN": {
+      "cluster": 5,
+      "environmentType": "잠재형",
+      "environmentScore": 40.22
+    },
+    "IRL": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 42.72
+    },
+    "ISL": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 41.96
+    },
+    "ITA": {
+      "cluster": 0,
+      "environmentType": "관찰필요형",
+      "environmentScore": 32.61
+    },
+    "JPN": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 39.2
+    },
+    "KOR": {
+      "cluster": 0,
+      "environmentType": "관찰필요형",
+      "environmentScore": 31.26
+    },
+    "LTU": {
+      "cluster": 5,
+      "environmentType": "잠재형",
+      "environmentScore": 38.2
+    },
+    "LUX": {
+      "cluster": 4,
+      "environmentType": "고용·정착 최우수형",
+      "environmentScore": 62.21
+    },
+    "LVA": {
+      "cluster": 5,
+      "environmentType": "잠재형",
+      "environmentScore": 38.62
+    },
+    "MEX": {
+      "cluster": 5,
+      "environmentType": "잠재형",
+      "environmentScore": 38.0
+    },
+    "NLD": {
+      "cluster": 2,
+      "environmentType": "안정형",
+      "environmentScore": 45.74
+    },
+    "NOR": {
+      "cluster": 2,
+      "environmentType": "안정형",
+      "environmentScore": 45.73
+    },
+    "NZL": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 45.62
+    },
+    "POL": {
+      "cluster": 3,
+      "environmentType": "고용·정착 우수형",
+      "environmentScore": 56.9
+    },
+    "PRT": {
+      "cluster": 5,
+      "environmentType": "잠재형",
+      "environmentScore": 44.71
+    },
+    "SVK": {
+      "cluster": 1,
+      "environmentType": "성장형",
+      "environmentScore": 36.16
+    },
+    "SVN": {
+      "cluster": 0,
+      "environmentType": "관찰필요형",
+      "environmentScore": 31.04
+    },
+    "SWE": {
+      "cluster": 2,
+      "environmentType": "안정형",
+      "environmentScore": 47.61
+    },
+    "TUR": {
+      "cluster": 5,
+      "environmentType": "잠재형",
+      "environmentScore": 42.63
+    },
+    "USA": {
+      "cluster": 2,
+      "environmentType": "안정형",
+      "environmentScore": 45.67
+    }
+  }
+}
