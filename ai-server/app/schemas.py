@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 CountryCode = Literal["CAN", "AUS", "GBR"]
+RuleStatus = Literal["MET", "NEEDS_IMPROVEMENT", "NEEDS_CONFIRMATION"]
 
 
 class AiRecommendRequest(BaseModel):
@@ -19,6 +20,13 @@ class CountryResult(BaseModel):
     rank: int
     country_code: CountryCode = Field(alias="countryCode", serialization_alias="countryCode")
     total_score: float = Field(alias="totalScore", serialization_alias="totalScore")
+    rule_score: float = Field(alias="ruleScore", serialization_alias="ruleScore")
+    environment_score: float = Field(alias="environmentScore", serialization_alias="environmentScore")
+    career_similarity: float = Field(alias="careerSimilarity", serialization_alias="careerSimilarity")
+    preference_score: float = Field(alias="preferenceScore", serialization_alias="preferenceScore")
+    rule_status: RuleStatus = Field(alias="ruleStatus", serialization_alias="ruleStatus")
+    strengths: list[str] = []
+    improvements: list[str] = []
 
     model_config = {"populate_by_name": True}
 
