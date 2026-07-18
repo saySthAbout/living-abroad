@@ -1,0 +1,150 @@
+Living Abroad
+RAG 및 비자 규칙 구현용 공식 문서 링크
+검증일: 2026-07-17
+
+※ 아래 링크는 캐나다·호주·영국 정부의 공식 문서입니다.
+※ 정책과 금액 기준은 변경될 수 있으므로 source_url, last_verified_at, effective_from 정보를 함께 저장하세요.
+
+
+============================================================
+1. 캐나다 — Express Entry / Federal Skilled Worker Program
+============================================================
+
+[비자 규칙 구현]
+
+문서명: Federal Skilled Worker Program 자격요건
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/who-can-apply/federal-skilled-workers.html
+
+문서명: Comprehensive Ranking System(CRS) 공식 점수 기준표
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/check-score/crs-criteria.html
+
+문서명: CRS 공식 점수 계산기
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/check-score.html
+
+문서명: 공인 언어시험 및 CLB/NCLC 변환 기준
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/documents/language-test.html
+
+문서명: 학력 인증 ECA 기준
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/documents/education-assessment.html
+
+문서명: 정착자금 Proof of Funds 기준
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/documents/proof-funds.html
+
+
+[RAG 상담 구현]
+
+문서명: Express Entry 전체 안내
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry.html
+
+문서명: Express Entry 준비 서류
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/documents.html
+
+문서명: Category-based Selection 기준
+링크: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/rounds-invitations/category-based-selection.html
+
+
+============================================================
+2. 호주 — Skilled Independent Visa Subclass 189
+============================================================
+
+[비자 규칙 구현]
+
+문서명: Subclass 189 Points-tested Stream 자격요건 및 신청 절차
+링크: https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/skilled-independent-189/points-tested
+
+문서명: Subclass 189 공식 점수표
+링크: https://immi.homeaffairs.gov.au/supporting/Pages/Work/189-points-table.aspx
+
+문서명: 호주 공식 Points Calculator
+링크: https://immi.homeaffairs.gov.au/help-support/tools/points-calculator
+
+문서명: Skilled Occupation List
+링크: https://immi.homeaffairs.gov.au/visas/working-in-australia/skill-occupation-list
+
+
+[RAG 상담 구현]
+
+문서명: Skilled Independent Visa Subclass 189 전체 안내
+링크: https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/skilled-independent-189
+
+문서명: Subclass 189 Points-tested Stream 서류·EOI·기술심사 안내
+링크: https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/skilled-independent-189/points-tested
+
+
+============================================================
+3. 영국 — Skilled Worker Visa
+============================================================
+
+[비자 규칙 구현]
+
+문서명: Immigration Rules Appendix Skilled Worker
+링크: https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-skilled-worker
+
+문서명: Immigration Rules Appendix Skilled Occupations
+링크: https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-skilled-occupations
+
+문서명: Skilled Worker 대상 직업 및 SOC 코드
+링크: https://www.gov.uk/government/publications/skilled-worker-visa-eligible-occupations
+
+문서명: 직업별 Going Rate
+링크: https://www.gov.uk/government/publications/skilled-worker-visa-going-rates-for-eligible-occupations/skilled-worker-visa-going-rates-for-eligible-occupation-codes
+
+문서명: Immigration Salary List 공식 규칙
+링크: https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-immigration-salary-list
+
+문서명: Skilled Worker 영어 능력 기준
+링크: https://www.gov.uk/skilled-worker-visa/knowledge-of-english
+
+문서명: 공식 스폰서 기업 목록
+링크: https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers
+
+
+[RAG 상담 구현]
+
+문서명: Skilled Worker Visa 전체 안내
+링크: https://www.gov.uk/skilled-worker-visa
+
+문서명: Skilled Worker Visa 필요 서류
+링크: https://www.gov.uk/skilled-worker-visa/documents-you-must-provide
+
+문서명: Skilled Worker 스폰서 지침
+링크: https://www.gov.uk/government/publications/sponsor-a-skilled-worker
+
+
+============================================================
+MVP에서 먼저 수집할 최소 문서
+============================================================
+
+캐나다
+1. Federal Skilled Worker Program 자격요건
+2. CRS 공식 점수 기준표
+3. 공인 언어시험 및 CLB/NCLC 변환 기준
+4. Express Entry 준비 서류
+
+호주
+1. Subclass 189 Points-tested Stream
+2. Subclass 189 공식 점수표
+3. Skilled Occupation List
+4. Subclass 189 신청 절차 및 서류
+
+영국
+1. Appendix Skilled Worker
+2. Appendix Skilled Occupations
+3. Skilled Worker 영어 능력 기준
+4. Skilled Worker Visa 필요 서류
+
+
+============================================================
+RAG 문서 저장 시 권장 메타데이터
+============================================================
+
+country_code
+visa_code
+document_title
+section_title
+source_url
+effective_from
+effective_to
+last_verified_at
+content_hash
+content
