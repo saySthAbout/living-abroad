@@ -1,6 +1,6 @@
 # Living Abroad 기술 스택 및 권장 버전
 
-기준일: 2026-07-17
+기준일: 2026-07-18
 
 최신 버전을 무조건 적용하기보다, 개발 일정과 라이브러리 호환성을 고려한 프로젝트 권장 고정 버전이다.
 
@@ -36,13 +36,16 @@
 | NLP Embedding | **Sentence Transformers 5.6.0** — 사용자 경력기술서와 NOC·ANZSCO·SOC 직업 설명의 유사도를 계산한다. |
 | Embedding Model | **`intfloat/multilingual-e5-base`** — 한국어 경력기술서와 영어 직업·정책 문서를 함께 비교하기 위한 다국어 임베딩 모델이다. |
 | Similarity Algorithm | **Cosine Similarity** — 사용자 경력 임베딩과 국가별 직업 설명 임베딩 사이의 유사도를 계산한다. |
-| LLM / RAG | **LLM API + 직접 구현 RAG Pipeline** — 공식 정책 문서를 청킹하고 pgvector로 검색한 후 LLM에 근거로 전달한다. |
+| LLM Serving Engine | **vLLM 0.23.0** — GPU 클라우드에서 오픈소스 LLM을 실행하고 OpenAI 호환 `/v1/chat/completions` API를 제공한다. |
+| Open-source LLM | **`Qwen/Qwen3-8B-AWQ`** — 한국어·영어 질의응답과 다국어 RAG에 사용할 자체 호스팅 생성 모델이다. MVP 상담에서는 응답 속도와 근거 중심 답변을 위해 비사고 모드(`enable_thinking=false`)를 기본값으로 사용한다. |
+| LLM / RAG | **Qwen3-8B-AWQ + vLLM + 직접 구현 RAG Pipeline** — 공식 정책 문서를 청킹하고 pgvector에서 검색한 뒤 검색 근거를 자체 호스팅 LLM에 전달한다. 외부 OpenAI·Claude API는 필수 의존성에서 제외한다. |
 | AI Test | **Pytest 9.1.1**, FastAPI TestClient — 점수 범위, 결측치 처리, 입력 재현성과 RAG 출처 반환을 테스트한다. |
-| Database | **PostgreSQL 18.4** — 사용자, 프로필, 분석 결과, 비자 규칙, 정책 문서와 채팅 기록을 저장한다. |
+| Database | **PostgreSQL 16.14** — 현재 로컬 개발 환경에 설치된 PostgreSQL 16 계열을 사용한다. |
+| PostgreSQL Client | **psql 16.14** — `psql --version` 명령으로 확인한 로컬 명령줄 클라이언트 버전이다. |
 | Vector Database | **pgvector 0.8.2** — 정책 문서와 직업 설명 임베딩을 저장하고 코사인 거리 기반으로 검색한다. |
 | Reverse Proxy | **Nginx 1.30.3 Stable** — Vue 정적 파일 제공, Spring Boot·FastAPI 프록시와 HTTPS 연결에 사용한다. |
 | Container | **Docker Engine 29.6.0**, Docker Desktop 4.82.0, Docker Compose 5.3.0 — 서비스를 컨테이너 단위로 구성한다. |
-| Database Image | **`pgvector/pgvector:0.8.2-pg18`** — PostgreSQL과 pgvector가 함께 설치된 컨테이너 이미지다. |
+| Database Image | **`pgvector/pgvector:0.8.2-pg16`** — PostgreSQL 16 계열과 pgvector가 함께 설치된 컨테이너 이미지다. |
 | API Communication | **REST API, JSON, Spring WebClient** — Vue, Spring Boot 및 FastAPI 사이의 데이터 통신에 사용한다. |
 | API Test Tool | **Postman 최신 안정 버전** — Spring Boot·FastAPI API 요청, 응답과 JWT 헤더를 테스트한다. |
 | Version Control | **Git 2.x, GitHub** — 소스 코드, 브랜치, Issues, README와 포트폴리오를 관리한다. |
@@ -95,19 +98,49 @@ Joblib 1.5.3
 PyTorch 2.13.0
 Sentence Transformers 5.6.0
 intfloat/multilingual-e5-base
+vLLM 0.23.0
+Qwen/Qwen3-8B-AWQ
 Pytest 9.1.1
 ```
+
+### 자체 호스팅 LLM
+
+```text
+Serving Engine: vLLM 0.23.0
+Primary Model: Qwen/Qwen3-8B-AWQ
+API Protocol: OpenAI-compatible Chat Completions
+RAG Context: PostgreSQL + pgvector 검색 결과
+Default Mode: Non-thinking mode
+External LLM API: 사용하지 않음
+```
+
+#### 모델 선택 기준
+
+- **Qwen3-8B-AWQ를 기본 모델로 선택한다.** 한국어와 영어를 함께 처리해야 하는 해외 이주 정책 상담에 적합하고, Apache 2.0 라이선스와 공식 AWQ 체크포인트를 제공해 자체 호스팅 구성이 비교적 단순하다.
+- **8B AWQ 모델은 MVP 우선순위에 맞춘 선택이다.** 14B 이상 모델보다 GPU 비용과 응답 지연을 줄이면서도 문서 기반 질의응답, 요약, 다국어 상담을 구현하기 충분하다.
+- **vLLM을 기본 서빙 엔진으로 선택한다.** GPU 서버에서 연속 배칭과 메모리 효율을 활용할 수 있고 OpenAI 호환 API를 제공하므로 FastAPI 연동 코드가 단순해진다.
+- 이미지 입력이나 매우 긴 원문을 직접 처리해야 하는 기능이 추가되면 **Gemma 3 12B IT**를 대안 모델로 검토한다. 현재 MVP는 텍스트 기반 정책 RAG이므로 기본 모델에는 포함하지 않는다.
 
 ### Database 및 배포
 
 ```text
-PostgreSQL 18.4
+PostgreSQL 16.14
+psql 16.14
 pgvector 0.8.2
 Nginx 1.30.3
 Docker Engine 29.6.0
 Docker Desktop 4.82.0
 Docker Compose 5.3.0
 ```
+
+
+### 로컬 PostgreSQL 버전 확인
+
+```text
+psql (PostgreSQL) 16.14
+```
+
+위 결과는 `psql --version`으로 확인한 **PostgreSQL 명령줄 클라이언트 버전**이다. 실제 DB 서버 버전은 PostgreSQL에 접속한 뒤 `SHOW server_version;`으로 최종 확인한다.
 
 ---
 
@@ -121,6 +154,12 @@ Spring Boot에서 관리하는 Spring Framework, Spring Security, Spring Data JP
 
 AI 서버에서 학습한 Scikit-learn 모델은 학습 환경과 운영 환경에서 같은 Scikit-learn 버전을 사용한다. 다른 버전에서 Joblib 모델을 불러오면 호환성 문제가 발생할 수 있다.
 
+LLM은 외부 API가 아니라 GPU 클라우드에 배포한 vLLM 서버에서 실행한다. FastAPI는 내부 네트워크의 vLLM OpenAI 호환 API만 호출하며, vLLM 포트는 인터넷에 직접 공개하지 않는다.
+
+생성 모델은 `Qwen/Qwen3-8B-AWQ`로 고정하고 모델 이름과 리비전 정보를 배포 설정에 기록한다. 모델을 변경할 때는 한국어 질의응답, 공식 문서 근거 준수, 응답 지연, GPU 메모리 사용량을 다시 평가한다.
+
+임베딩 모델과 생성 모델의 역할을 분리한다. `intfloat/multilingual-e5-base`는 검색용 임베딩을 생성하고, `Qwen/Qwen3-8B-AWQ`는 검색된 근거를 사용해 최종 답변을 생성한다.
+
 프로젝트 저장소에는 각 환경의 버전 정보를 다음 파일에 기록한다.
 
 ```text
@@ -130,6 +169,8 @@ backend/build.gradle
 backend/gradle/wrapper/gradle-wrapper.properties
 ai-server/requirements.txt
 ai-server/.python-version
+llm-server/Dockerfile
+llm-server/start-vllm.sh
 docker-compose.yml
 README.md
 ```
