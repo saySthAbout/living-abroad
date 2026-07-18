@@ -1,71 +1,59 @@
 from fastapi import APIRouter
 
+from app.rule_engine import evaluate_rule_score, preference_score
 from app.schemas import AiRecommendRequest, AiRecommendResponse, CountryResult
 
 router = APIRouter()
 
-# Fixed placeholder scores until the rule engine + K-Means + career-similarity
-# pipeline (F-AI-001~011) replaces this, per Development_Workflow.md section 6.
-_TEMP_SCORES: dict[str, dict] = {
-    "CAN": {
-        "total": 85,
-        "rule": 82,
-        "environment": 88,
-        "career": 86,
-        "preference": 80,
-        "status": "NEEDS_IMPROVEMENT",
-        "strengths": ["관련 경력 5년", "학사 학위 보유"],
-        "improvements": ["영어 점수 보완 필요"],
-    },
-    "AUS": {
-        "total": 78,
-        "rule": 75,
-        "environment": 94,
-        "career": 78,
-        "preference": 50,
-        "status": "NEEDS_IMPROVEMENT",
-        "strengths": ["나이 점수 최상"],
-        "improvements": ["영어 성적 보완"],
-    },
-    "GBR": {
-        "total": 73,
-        "rule": 70,
-        "environment": 75,
-        "career": 85,
-        "preference": 50,
-        "status": "NEEDS_CONFIRMATION",
-        "strengths": ["직군 수요 높음"],
-        "improvements": ["스폰서 고용 제안 여부 확인 필요"],
-    },
+# Environment score and career similarity are still fixed placeholders until
+# the K-Means model (F-AI-004~005) and Sentence Transformer matching
+# (F-AI-006~007) replace them. Rule score and preference score are real
+# (rule engine backed by visa_rules, F-AI-001~003 / F-AI-008).
+_TEMP_ENV_CAREER: dict[str, dict[str, float]] = {
+    "CAN": {"environment": 88, "career": 86},
+    "AUS": {"environment": 94, "career": 78},
+    "GBR": {"environment": 75, "career": 85},
 }
+
+SCORE_WEIGHTS = {"rule": 0.45, "environment": 0.25, "career": 0.20, "preference": 0.10}
 
 
 @router.post("/ai/recommend", response_model=AiRecommendResponse)
 def recommend(request: AiRecommendRequest) -> AiRecommendResponse:
-    results = sorted(
-        (
+    results = []
+    for country in request.supported_countries:
+        rule_result = evaluate_rule_score(country, request.user_profile)
+        env_career = _TEMP_ENV_CAREER[country]
+        pref_score = preference_score(country, request.user_profile.get("preferredCountry"))
+
+        total_score = (
+            rule_result["ruleScore"] * SCORE_WEIGHTS["rule"]
+            + env_career["environment"] * SCORE_WEIGHTS["environment"]
+            + env_career["career"] * SCORE_WEIGHTS["career"]
+            + pref_score * SCORE_WEIGHTS["preference"]
+        )
+
+        results.append(
             CountryResult(
                 rank=0,
                 country_code=country,
-                total_score=_TEMP_SCORES[country]["total"],
-                rule_score=_TEMP_SCORES[country]["rule"],
-                environment_score=_TEMP_SCORES[country]["environment"],
-                career_similarity=_TEMP_SCORES[country]["career"],
-                preference_score=_TEMP_SCORES[country]["preference"],
-                rule_status=_TEMP_SCORES[country]["status"],
-                strengths=_TEMP_SCORES[country]["strengths"],
-                improvements=_TEMP_SCORES[country]["improvements"],
+                total_score=round(total_score, 2),
+                rule_score=rule_result["ruleScore"],
+                environment_score=env_career["environment"],
+                career_similarity=env_career["career"],
+                preference_score=pref_score,
+                rule_status=rule_result["ruleStatus"],
+                strengths=rule_result["strengths"],
+                improvements=rule_result["improvements"],
             )
-            for country in request.supported_countries
-        ),
-        key=lambda result: result.total_score,
-        reverse=True,
-    )
+        )
+
+    results.sort(key=lambda result: result.total_score, reverse=True)
     for index, result in enumerate(results, start=1):
         result.rank = index
 
     return AiRecommendResponse(
-        model_version="temp-fixed-0.0.1",
-        data_version="temp",
+        model_version="rule-engine-1.0.0+temp-env-career-0.0.1",
+        data_version="2026-07-17",
         results=results,
     )
