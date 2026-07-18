@@ -32,6 +32,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", exception.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(AnalysisNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAnalysisNotFound(AnalysisNotFoundException exception, HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, "ANALYSIS_NOT_FOUND", exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(AnalysisAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAnalysisAccessDenied(AnalysisAccessDeniedException exception, HttpServletRequest request) {
+        return build(HttpStatus.FORBIDDEN, "ANALYSIS_ACCESS_DENIED", exception.getMessage(), request, List.of());
+    }
+
     private ResponseEntity<ErrorResponse> build(
         HttpStatus status,
         String code,
