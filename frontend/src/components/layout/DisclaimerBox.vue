@@ -5,5 +5,8 @@ withDefaults(defineProps<{ text?: string }>(), {
 </script>
 
 <template>
-  <p class="rounded bg-gray-50 px-4 py-2 text-xs text-gray-500">{{ text }}</p>
+  <p class="flex items-start gap-2 rounded-lg border border-soft-100 bg-soft-50 px-4 py-3 text-xs text-slate-500">
+    <span aria-hidden="true">ⓘ</span>
+    <span>{{ text }}</span>
+  </p>
 </template>
