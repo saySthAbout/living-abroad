@@ -8,34 +8,37 @@ interface Step1Data {
   major: string
   occupation: string
   experienceYears: number | null
+  languageTest: string | null
+  languageScore: number | null
 }
 
 interface Step2Data {
-  languageTest: string | null
-  languageScore: number | null
+  careerText: string
   fundsRange: string | null
   familyAccompanied: boolean
   preferredCountry: string | null
-  careerText: string
 }
 
-export const useAnalysisStore = defineStore('analysis', () => {
-  const step1Data = ref<Step1Data>({
-    age: null,
-    education: null,
-    major: '',
-    occupation: '',
-    experienceYears: null,
-  })
+const emptyStep1 = (): Step1Data => ({
+  age: null,
+  education: null,
+  major: '',
+  occupation: '',
+  experienceYears: null,
+  languageTest: null,
+  languageScore: null,
+})
 
-  const step2Data = ref<Step2Data>({
-    languageTest: null,
-    languageScore: null,
-    fundsRange: null,
-    familyAccompanied: false,
-    preferredCountry: null,
-    careerText: '',
-  })
+const emptyStep2 = (): Step2Data => ({
+  careerText: '',
+  fundsRange: null,
+  familyAccompanied: false,
+  preferredCountry: null,
+})
+
+export const useAnalysisStore = defineStore('analysis', () => {
+  const step1Data = ref<Step1Data>(emptyStep1())
+  const step2Data = ref<Step2Data>(emptyStep2())
 
   const analysisId = ref<number | null>(null)
   const analysisResult = ref<Record<string, unknown> | null>(null)
@@ -64,15 +67,8 @@ export const useAnalysisStore = defineStore('analysis', () => {
   }
 
   function resetAnalysis() {
-    step1Data.value = { age: null, education: null, major: '', occupation: '', experienceYears: null }
-    step2Data.value = {
-      languageTest: null,
-      languageScore: null,
-      fundsRange: null,
-      familyAccompanied: false,
-      preferredCountry: null,
-      careerText: '',
-    }
+    step1Data.value = emptyStep1()
+    step2Data.value = emptyStep2()
     analysisId.value = null
     analysisResult.value = null
   }
