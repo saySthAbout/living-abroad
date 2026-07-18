@@ -1,7 +1,12 @@
+# torch is CPU-only; install it first from the CPU wheel index to avoid
+# pulling the ~2GB CUDA build:
+#   pip install torch==2.13.0 --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
 fastapi==0.139.0
 pydantic==2.13.4
 uvicorn[standard]==0.51.0
 psycopg2-binary==2.9.12
+pgvector==0.5.0
 python-dotenv==1.2.2
 pandas==3.0.3
 numpy==2.5.1
