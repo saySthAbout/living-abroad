@@ -1,5 +1,7 @@
 package com.livingabroad.backend.client;
 
+import com.livingabroad.backend.dto.ai.AiRagRequestDto;
+import com.livingabroad.backend.dto.ai.AiRagResponseDto;
 import com.livingabroad.backend.dto.ai.AiRecommendRequestDto;
 import com.livingabroad.backend.dto.ai.AiRecommendResponseDto;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,5 +38,14 @@ public class AiServerClient {
             .body(request)
             .retrieve()
             .body(AiRecommendResponseDto.class);
+    }
+
+    public AiRagResponseDto ragAnswer(AiRagRequestDto request) {
+        return restClient.post()
+            .uri("/ai/rag/answer")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .retrieve()
+            .body(AiRagResponseDto.class);
     }
 }
