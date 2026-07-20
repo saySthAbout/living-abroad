@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.rag import answer_question
 from app.schemas import AiRagRequest, AiRagResponse
 
 router = APIRouter()
@@ -7,10 +8,10 @@ router = APIRouter()
 
 @router.post("/ai/rag/answer", response_model=AiRagResponse)
 def rag_answer(request: AiRagRequest) -> AiRagResponse:
-    # Placeholder until pgvector search + LLM generation (F-RAG-003/004) lands.
+    result = answer_question(request.country_code, request.question)
     return AiRagResponse(
-        answer="현재 등록된 공식 문서에서 근거를 찾지 못했습니다. 공식 기관 또는 전문가에게 확인해 주세요.",
-        answerable=False,
-        sources=[],
-        prompt_version="temp-0.0.1",
+        answer=result["answer"],
+        answerable=result["answerable"],
+        sources=result["sources"],
+        prompt_version="rag-e5-search+llm-1.0.0",
     )

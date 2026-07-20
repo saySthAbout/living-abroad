@@ -20,6 +20,7 @@ const question = ref('')
 const errorMessage = ref('')
 const sending = ref(false)
 const scrollAnchor = ref<HTMLElement | null>(null)
+const sessionId = ref<number | null>(null)
 
 const messages = ref<ChatMessage[]>([
   {
@@ -46,9 +47,11 @@ async function sendQuestion(text?: string) {
   await scrollToBottom()
   try {
     const { data } = await apiClient.post('/api/chat', {
+      sessionId: sessionId.value,
       question: content,
       countryCode: countryCode.value,
     })
+    sessionId.value = data.sessionId
     messages.value.push({
       role: 'ASSISTANT',
       content: data.answer,

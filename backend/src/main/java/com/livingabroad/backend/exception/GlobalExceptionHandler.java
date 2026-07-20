@@ -42,6 +42,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.FORBIDDEN, "ANALYSIS_ACCESS_DENIED", exception.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(ChatSessionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleChatSessionNotFound(ChatSessionNotFoundException exception, HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, "CHAT_SESSION_NOT_FOUND", exception.getMessage(), request, List.of());
+    }
+
     private ResponseEntity<ErrorResponse> build(
         HttpStatus status,
         String code,
