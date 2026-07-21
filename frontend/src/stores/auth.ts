@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function loadUser() {
     if (!token.value) return
-    const { data } = await apiClient.get('/api/users/me/profile')
+    const { data } = await apiClient.get('/api/users/me')
     user.value = data
   }
 

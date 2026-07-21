@@ -47,6 +47,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.NOT_FOUND, "CHAT_SESSION_NOT_FOUND", exception.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException exception, HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", exception.getMessage(), request, List.of());
+    }
+
     private ResponseEntity<ErrorResponse> build(
         HttpStatus status,
         String code,

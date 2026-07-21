@@ -1,7 +1,11 @@
 package com.livingabroad.backend.controller;
 
+import com.livingabroad.backend.dto.auth.AuthResponse;
 import com.livingabroad.backend.dto.profile.UserProfileRequest;
 import com.livingabroad.backend.dto.profile.UserProfileResponse;
+import com.livingabroad.backend.entity.User;
+import com.livingabroad.backend.exception.UserNotFoundException;
+import com.livingabroad.backend.repository.UserRepository;
 import com.livingabroad.backend.service.UserProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +22,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserProfileService userProfileService;
+    private final UserRepository userRepository;
 
-    public UserController(UserProfileService userProfileService) {
+    public UserController(UserProfileService userProfileService, UserRepository userRepository) {
         this.userProfileService = userProfileService;
+        this.userRepository = userRepository;
+    }
+
+    @GetMapping
+    public ResponseEntity<AuthResponse.UserSummary> getMe(@AuthenticationPrincipal Jwt jwt) {
+        User user = userRepository.findById(Long.valueOf(jwt.getSubject()))
+            .orElseThrow(UserNotFoundException::new);
+        return ResponseEntity.ok(new AuthResponse.UserSummary(user.getUserId(), user.getUserName(), user.getEmail()));
     }
 
     @GetMapping("/profile")
