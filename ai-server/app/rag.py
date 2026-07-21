@@ -9,12 +9,13 @@ prompt instruction, per the "don't guess" hard rule.
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 
 os.environ.setdefault("HF_HUB_DISABLE_IMPLICIT_TOKEN", "1")
 
-from openai import OpenAI
+from openai import APIError, OpenAI
 from pgvector.psycopg2 import register_vector
 from sentence_transformers import SentenceTransformer
 
@@ -22,11 +23,14 @@ from app import config
 from app.career_matching import HNSW_EF_SEARCH
 from app.db import get_connection
 
+logger = logging.getLogger(__name__)
+
 EMBEDDING_MODEL_NAME = "intfloat/multilingual-e5-base"
 SIMILARITY_THRESHOLD = 0.78
 TOP_K = 5
 
 REFUSAL_ANSWER = "현재 등록된 공식 문서에서 근거를 찾지 못했습니다. 공식 기관 또는 전문가에게 확인해 주세요."
+LLM_UNAVAILABLE_ANSWER = "AI 답변 생성 서버에 일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."
 
 SYSTEM_PROMPT = (
     "당신은 해외 취업·이주 공식 정책 상담 도우미입니다. "
@@ -127,7 +131,15 @@ def answer_question(country_code: str, question: str) -> dict:
             "sources": [],
         }
 
-    answer = _generate_answer(question, relevant_chunks)
+    try:
+        answer = _generate_answer(question, relevant_chunks)
+    except APIError:
+        logger.exception("LLM 서버 호출 실패 (country_code=%s)", country_code)
+        return {
+            "answer": LLM_UNAVAILABLE_ANSWER,
+            "answerable": False,
+            "sources": [],
+        }
 
     sources = [
         {

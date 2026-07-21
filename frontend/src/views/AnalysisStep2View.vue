@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAnalysisStore } from '@/stores/analysis'
+import { getErrorMessage } from '@/api/client'
 
 const router = useRouter()
 const analysisStore = useAnalysisStore()
@@ -31,8 +32,8 @@ async function submit() {
   try {
     await analysisStore.submitAnalysis()
     router.push('/analysis/loading')
-  } catch {
-    errorMessage.value = '분석 요청 중 오류가 발생했습니다.'
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, '분석 요청 중 오류가 발생했습니다.')
   } finally {
     submitting.value = false
   }

@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAnalysisStore } from '@/stores/analysis'
 import DisclaimerBox from '@/components/layout/DisclaimerBox.vue'
+import { getErrorMessage } from '@/api/client'
 
 const router = useRouter()
 const analysisStore = useAnalysisStore()
@@ -43,10 +44,10 @@ async function poll() {
       clearInterval(progressTimer)
       errorMessage.value = '분석을 완료하지 못했습니다. 다시 시도해 주세요.'
     }
-  } catch {
+  } catch (error) {
     clearInterval(pollTimer)
     clearInterval(progressTimer)
-    errorMessage.value = '분석 상태를 확인하는 중 오류가 발생했습니다.'
+    errorMessage.value = getErrorMessage(error, '분석 상태를 확인하는 중 오류가 발생했습니다.')
   }
 }
 

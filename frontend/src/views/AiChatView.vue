@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue'
-import { apiClient } from '@/api/client'
+import { apiClient, getErrorMessage } from '@/api/client'
 
 interface ChatSource {
   title: string
@@ -58,8 +58,8 @@ async function sendQuestion(text?: string) {
       answerable: data.answerable,
       sources: data.sources,
     })
-  } catch {
-    errorMessage.value = '답변 생성 중 오류가 발생했습니다.'
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, '답변 생성 중 오류가 발생했습니다.')
   } finally {
     sending.value = false
     await scrollToBottom()

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import DisclaimerBox from '@/components/layout/DisclaimerBox.vue'
 import LoadingSpinner from '@/components/layout/LoadingSpinner.vue'
 import { COUNTRIES } from '@/constants/countries'
+import { getErrorMessage } from '@/api/client'
 
 interface CountryResult {
   rank: number
@@ -56,8 +57,8 @@ onMounted(async () => {
   const analysisId = Number(route.params.id)
   try {
     await analysisStore.loadResult(analysisId)
-  } catch {
-    loadError.value = '분석 결과를 불러오지 못했습니다.'
+  } catch (error) {
+    loadError.value = getErrorMessage(error, '분석 결과를 불러오지 못했습니다.')
   } finally {
     loading.value = false
   }

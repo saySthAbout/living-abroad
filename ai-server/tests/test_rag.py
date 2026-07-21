@@ -1,6 +1,8 @@
 from unittest.mock import MagicMock, patch
 
-from app.rag import SIMILARITY_THRESHOLD, answer_question
+from openai import APIError
+
+from app.rag import LLM_UNAVAILABLE_ANSWER, SIMILARITY_THRESHOLD, answer_question
 
 
 def _fake_chunk(similarity: float, chunk_id: int = 1) -> dict:
@@ -48,6 +50,18 @@ def test_answer_question_filters_out_below_threshold_chunks_individually():
     assert result["sources"][0]["chunkId"] == 1
     passed_chunks = mock_generate.call_args[0][1]
     assert len(passed_chunks) == 1
+
+
+def test_answer_question_degrades_gracefully_when_llm_unreachable():
+    relevant = _fake_chunk(SIMILARITY_THRESHOLD + 0.05)
+    llm_error = APIError("connection failed", request=MagicMock(), body=None)
+    with patch("app.rag.search_policy_chunks", return_value=[relevant]), \
+         patch("app.rag._generate_answer", side_effect=llm_error):
+        result = answer_question("CAN", "Express Entry 서류가 뭐야?")
+
+    assert result["answerable"] is False
+    assert result["answer"] == LLM_UNAVAILABLE_ANSWER
+    assert result["sources"] == []
 
 
 def test_llm_client_uses_configured_base_url_and_model():

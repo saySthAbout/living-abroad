@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { apiClient } from '@/api/client'
+import { apiClient, getErrorMessage } from '@/api/client'
 import { useAuthStore } from '@/stores/auth'
 import DisclaimerBox from '@/components/layout/DisclaimerBox.vue'
 import LoadingSpinner from '@/components/layout/LoadingSpinner.vue'
@@ -34,8 +34,8 @@ onMounted(async () => {
   try {
     const { data } = await apiClient.get('/api/analyses')
     items.value = data.items ?? []
-  } catch {
-    loadError.value = '분석 이력을 불러오지 못했습니다.'
+  } catch (error) {
+    loadError.value = getErrorMessage(error, '분석 이력을 불러오지 못했습니다.')
   } finally {
     loading.value = false
   }

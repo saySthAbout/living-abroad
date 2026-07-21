@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { getErrorMessage } from '@/api/client'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,8 +24,8 @@ async function submitLogin() {
   try {
     await authStore.login(loginForm.value)
     router.push('/analysis/step-1')
-  } catch {
-    errorMessage.value = '이메일 또는 비밀번호를 확인해 주세요.'
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, '이메일 또는 비밀번호를 확인해 주세요.')
   }
 }
 
@@ -41,8 +42,8 @@ async function submitSignup() {
       password: signupForm.value.password,
     })
     router.push('/analysis/step-1')
-  } catch {
-    errorMessage.value = '회원가입 처리 중 오류가 발생했습니다.'
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, '회원가입 처리 중 오류가 발생했습니다.')
   }
 }
 </script>
