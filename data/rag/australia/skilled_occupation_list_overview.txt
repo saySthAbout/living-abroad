@@ -1,0 +1,17 @@
+문서명: 호주 Skilled Occupation List 안내
+국가: AUS
+비자 코드: AU_SKILLED_INDEPENDENT_189
+출처 URL: https://immi.homeaffairs.gov.au/visas/working-in-australia/skill-occupation-list
+검증일: 2026-07-21
+
+---
+
+Individuals with qualifications to work or train in an eligible skilled occupation in Australia, and who can meet all other requirements, may apply to several visas including the Skilled Independent visa (subclass 189) – Points-tested stream, among others (Employer Nomination Scheme, Skilled Nominated visa, Skills in Demand visa, Temporary Graduate visa, and various regional visas).
+
+The combined skilled occupation list specifies: the Australian and New Zealand Standard Classification of Occupations (ANZSCO) code for each occupation, which provides information on the skill level of jobs and the qualifications and/or experience needed; caveats which exclude the use of the occupation in certain circumstances; whether the occupation is included on the Core Skills Occupation List (CSOL), the Medium and Long-term Strategic Skills List (MLTSSL), the Short-term Skilled Occupation List (STSOL), or the Regional Occupation List (ROL); and the assessing authority for skills assessments.
+
+ANZSCO versions used in the skilled visa program: the 2022 version of ANZSCO is used for the Employer Nomination Scheme (subclass 186) and Skills in Demand visa (subclass 482), including CSOL occupations. The 2013 ANZSCO version is used for all other skilled visa subclasses, including MLTSSL, STSOL, and ROL occupations. If you have previously held another type of skilled visa, updates to the ANZSCO dictionary may have reclassified your occupation, so you must select an occupation code that aligns with the tasks and responsibilities of your position.
+
+Removed occupations: pending nomination and/or visa applications are not adversely impacted by the subsequent removal of an occupation from the skilled occupation lists. If you already hold a skilled visa, you are not impacted by removed occupations unless your circumstances change (e.g. you change occupation or employer) and your occupation is no longer on the combined list.
+
+For Skilled Independent visa (subclass 189) applicants specifically, your nominated occupation must appear on the relevant occupation list at the time you are invited to apply, and you must have a suitable skills assessment for that occupation from the relevant assessing authority.

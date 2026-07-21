@@ -1,0 +1,47 @@
+문서명: Comprehensive Ranking System (CRS) 기준
+국가: CAN
+비자 코드: CA_EXPRESS_ENTRY_FSW
+출처 URL: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/eligibility/criteria-comprehensive-ranking-system/grid.html
+검증일: 2026-07-21
+
+---
+
+The Comprehensive Ranking System (CRS) is a points-based system that we use to assess and score your profile and rank it in the Express Entry pool.
+
+As of March 25, 2025, we're removing job offer points from the Comprehensive Ranking System for current and future candidates in the Express Entry pool. This includes job offers classified under Major Group 00 of the National Occupation Classification (for example, senior management positions) (200 points) or in any other skilled occupation (50 points).
+
+A. Core/human capital factors
+
+You will earn points as if you don't have a spouse or partner if they are not coming with you to Canada, or they are a Canadian citizen or permanent resident.
+
+Factors and points with a spouse or common-law partner / without a spouse or common-law partner:
+- Age: 100 / 110
+- Level of education: 140 / 150
+- Official languages proficiency: 150 / 160
+- Canadian work experience: 70 / 80
+
+B. Spouse or common-law partner factors (if applicable), maximum 40 points:
+- Level of education: 10
+- Official language proficiency: 20
+- Canadian work experience: 10
+
+C. Skill Transferability factors
+
+Education (maximum 50 points):
+- With good/strong official languages proficiency and a post-secondary degree: 50
+- With Canadian work experience and a post-secondary degree: 50
+
+Foreign work experience (maximum 50 points):
+- With good/strong official languages proficiency (Canadian Language Benchmark [CLB] level 7 or higher) and foreign work experience: 50
+- With Canadian work experience and foreign work experience: 50
+
+Certificate of qualification for people in trade occupations (maximum 50 points):
+- With good/strong official languages proficiency and a certificate of qualification: 50
+
+D. Additional points (maximum points per factor):
+- Brother or sister living in Canada (18 years or older, citizen or permanent resident): 15
+- French language skills: 50
+- Post-secondary education in Canada: 30
+- Provincial or territorial nomination: 600
+
+To get an invitation to apply, your CRS score must be above the minimum points score of your round of invitations. Cut-off scores may vary each round.

@@ -1,0 +1,45 @@
+문서명: Subclass 189 포인트 테이블 (Points Table)
+국가: AUS
+비자 코드: AU_SKILLED_INDEPENDENT_189
+출처 URL: https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/skilled-independent-189/points-table
+검증일: 2026-07-21
+
+---
+
+Under the SkillSelect model, the Department of Home Affairs invite skilled workers to apply for a Skilled Independent visa (subclass 189) based on the claims presented in their expression of interest (EOI) in SkillSelect. The applicant must satisfy most criteria specified in the points test at the time of invitation and provide documents to support all claims made in their EOI.
+
+Age points:
+- At least 18 but less than 25 years: 25 points
+- At least 25 but less than 33 years: 30 points
+- At least 33 but less than 40 years: 25 points
+- At least 40 but less than 45 years: 15 points
+
+English language skills points:
+- Competent English: 0 points
+- Proficient English: 10 points
+- Superior English: 20 points
+
+Skilled employment experience — Overseas skilled employment (outside Australia):
+- Less than 3 years: 0 points
+- At least 3 but less than 5 years: 5 points
+- At least 5 but less than 8 years: 10 points
+- At least 8 years: 15 points
+
+Skilled employment experience — Australian skilled employment (in Australia):
+- Less than 1 year: 0 points
+- At least 1 but less than 3 years: 5 points
+- At least 3 but less than 5 years: 10 points
+- At least 5 but less than 8 years: 15 points
+- At least 8 years: 20 points
+
+You can only claim points for employment if the employment was in your nominated skilled occupation or a closely related skilled occupation, and you were employed for the relevant periods in the 10 years before you are invited to apply. Employed means engaged in an occupation for remuneration for at least 20 hours a week. Under the points test there is a cap on employment experience points — the maximum is 20 points combined.
+
+Educational qualifications points:
+- A Doctorate from an Australian educational institution, or from another institution of a recognised standard: 20 points
+- At least a Bachelor degree from an Australian institution, or a qualification of a recognised standard from another institution: 15 points
+- A diploma or trade qualification from an Australian educational institution: 10 points
+- A qualification or award recognised by the relevant assessing authority for your nominated skilled occupation: 10 points
+
+For points based migration you will receive points for your highest qualification only.
+
+Specialist education qualification: a Masters degree by research or a Doctorate degree from an Australian educational institution that included at least 2 academic years study in a relevant STEM field (natural and physical sciences, information technology, or engineering and related technologies): 10 points.

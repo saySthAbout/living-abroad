@@ -1,0 +1,23 @@
+문서명: Skilled Worker 비자 직무·급여 요건
+국가: GBR
+비자 코드: UK_SKILLED_WORKER
+출처 URL: https://www.gov.uk/skilled-worker-visa/your-job
+검증일: 2026-07-21
+
+---
+
+You must meet all the following requirements to be eligible for a Skilled Worker visa: your job is eligible for this visa, you'll be working for a UK employer that's been approved by the Home Office, and you'll be paid at least the minimum salary rate for the type of work you'll be doing.
+
+The minimum salary for the type of work you'll be doing is whichever is the highest of: £41,700 per year, or the 'going rate' for the type of work you'll be doing. The minimum salary may be lower if you're extending your Skilled Worker visa, updating it because you have a new job or employer, or switching to this visa to become a prison officer. Your employer must make sure your job pays at least the minimum wage and follows UK working-hours rules, or your application will be refused.
+
+Checking job eligibility: you need your job's 4-digit occupation code (ask your employer, or search the CASCOT occupation coding tool). If your occupation code is listed as a 'higher skilled' job, you can apply for this visa. If listed as 'medium skilled', you can apply only if your job is on the immigration salary list, on the temporary shortage list, or is prison officer (code 3314) and you're extending/switching.
+
+Salary requirements: you'll usually need to be paid the 'standard' salary rate of at least £41,700 per year, or the 'going rate' for your job (each occupation code has its own annual going rate), whichever is higher. Example: a salary of £42,000/year does not meet requirements if the going rate for that job is £45,000/year.
+
+Different salary rules apply if you work in healthcare or education, where the going rate is based on national pay scales.
+
+Prison officers extending or switching to this visa need at least the higher of £31,300/year or the 'lower going rate' for prison officers.
+
+If you do not meet the usual salary requirements (and don't work in healthcare/education), you might still be eligible if your salary will be at least £33,400 per year (lower salary requirements may also apply when extending or updating your visa).
+
+Approved UK employers: you must have a job offer from an approved UK employer (sponsor) before you apply. If your employer is not currently approved, they can apply for a sponsor licence — £611 for small businesses/charities, or £1,682 for medium/large organisations, taking around 8 weeks to process. Care workers (code 6135) and senior care workers (code 6136) working in England must have an employer registered with the Care Quality Commission.

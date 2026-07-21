@@ -1,0 +1,27 @@
+문서명: Express Entry 언어 시험 요건
+국가: CAN
+비자 코드: CA_EXPRESS_ENTRY_FSW
+출처 URL: https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/documents/language-requirements.html
+검증일: 2026-07-21
+
+---
+
+You must prove your language skills by taking an approved language test. You must schedule your test with an agency approved by IRCC and pay the costs, then enter the test results into your Express Entry profile.
+
+Language tests we accept:
+- English: CELPIP-General test (Canadian English Language Proficiency Index Program), or IELTS General Training option (IELTS One Skill Retake is not accepted for Express Entry), or PTE Core (Pearson Test of English)
+- French: TEF Canada, or TCF Canada
+
+Language requirements are measured using Canadian Language Benchmarks (CLB) for English and Niveaux de compétence linguistique canadien (NCLC) for French.
+
+First official language minimum level for all 4 abilities (Canadian Experience Class, Federal Skilled Worker Program, Federal Skilled Trades Program):
+- English: CLB 7
+- French: NCLC 7
+
+Second official language minimum level of CLB or NCLC 5:
+- English speaking and listening: CLB 5
+- English reading and writing: CLB 4
+- French speaking and listening: NCLC 5
+- French reading and writing: NCLC 4
+
+How long your results are valid for: your test results must be less than 2 years old when you complete your Express Entry profile, and when you submit your application for permanent residence.
