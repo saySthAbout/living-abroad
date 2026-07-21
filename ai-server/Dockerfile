@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir torch==2.13.0 --index-url https://download.pytorc
 COPY app app
 COPY models models
 
-RUN useradd -r appuser
+RUN useradd -r -m appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
