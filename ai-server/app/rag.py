@@ -10,6 +10,7 @@ prompt instruction, per the "don't guess" hard rule.
 from __future__ import annotations
 
 import os
+import re
 
 os.environ.setdefault("HF_HUB_DISABLE_IMPLICIT_TOKEN", "1")
 
@@ -105,8 +106,14 @@ def _generate_answer(question: str, chunks: list[dict]) -> str:
             {"role": "user", "content": _build_user_prompt(question, chunks)},
         ],
         temperature=0.2,
+        # Qwen3는 요청 단위로 thinking mode를 꺼야 한다 (서버 시작 옵션이 아님).
+        # Ollama 등 이 파라미터를 모르는 백엔드는 그냥 무시한다.
+        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
     )
-    return response.choices[0].message.content.strip()
+    content = response.choices[0].message.content.strip()
+    # 혹시 thinking mode가 안 꺼졌을 때를 대비한 방어적 후처리.
+    content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+    return content
 
 
 def answer_question(country_code: str, question: str) -> dict:
