@@ -6,12 +6,14 @@ import com.livingabroad.backend.dto.profile.UserProfileResponse;
 import com.livingabroad.backend.entity.User;
 import com.livingabroad.backend.exception.UserNotFoundException;
 import com.livingabroad.backend.repository.UserRepository;
+import com.livingabroad.backend.service.EmailVerificationService;
 import com.livingabroad.backend.service.UserProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,17 +25,29 @@ public class UserController {
 
     private final UserProfileService userProfileService;
     private final UserRepository userRepository;
+    private final EmailVerificationService emailVerificationService;
 
-    public UserController(UserProfileService userProfileService, UserRepository userRepository) {
+    public UserController(
+        UserProfileService userProfileService,
+        UserRepository userRepository,
+        EmailVerificationService emailVerificationService
+    ) {
         this.userProfileService = userProfileService;
         this.userRepository = userRepository;
+        this.emailVerificationService = emailVerificationService;
     }
 
     @GetMapping
     public ResponseEntity<AuthResponse.UserSummary> getMe(@AuthenticationPrincipal Jwt jwt) {
         User user = userRepository.findById(Long.valueOf(jwt.getSubject()))
             .orElseThrow(UserNotFoundException::new);
-        return ResponseEntity.ok(new AuthResponse.UserSummary(user.getUserId(), user.getUserName(), user.getEmail()));
+        return ResponseEntity.ok(new AuthResponse.UserSummary(user.getUserId(), user.getUserName(), user.getEmail(), user.isEmailVerified()));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Void> resendVerification(@AuthenticationPrincipal Jwt jwt) {
+        emailVerificationService.resend(Long.valueOf(jwt.getSubject()));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/profile")

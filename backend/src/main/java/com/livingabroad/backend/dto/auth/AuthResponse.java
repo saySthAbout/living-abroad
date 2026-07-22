@@ -7,6 +7,6 @@ public record AuthResponse(
     String refreshToken,
     UserSummary user
 ) {
-    public record UserSummary(Long id, String name, String email) {
+    public record UserSummary(Long id, String name, String email, boolean emailVerified) {
     }
 }

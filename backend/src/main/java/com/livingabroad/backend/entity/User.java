@@ -30,6 +30,9 @@ public class User {
     @Column(name = "account_status", nullable = false)
     private String accountStatus = "ACTIVE";
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
     @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private OffsetDateTime createdAt;
 
@@ -63,5 +66,13 @@ public class User {
 
     public String getAccountStatus() {
         return accountStatus;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void markEmailVerified() {
+        this.emailVerified = true;
     }
 }

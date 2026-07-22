@@ -25,7 +25,9 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +44,9 @@ class AuthServiceTest {
 
     @Mock
     private JwtService jwtService;
+
+    @Mock
+    private EmailVerificationService emailVerificationService;
 
     @InjectMocks
     private AuthService authService;
@@ -80,6 +85,22 @@ class AuthServiceTest {
         assertThat(response.refreshToken()).isEqualTo("raw-refresh-token");
         assertThat(response.user().email()).isEqualTo("new@example.com");
         assertThat(response.user().name()).isEqualTo("Test User");
+        assertThat(response.user().emailVerified()).isFalse();
+        verify(emailVerificationService).sendVerificationEmail(any(User.class));
+    }
+
+    @Test
+    void signupStillSucceedsWhenVerificationEmailFails() {
+        stubTokenIssuance();
+        SignupRequest request = new SignupRequest("Test User", "mailfail@example.com", "Passw0rd1");
+        when(userRepository.existsByEmail("mailfail@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("Passw0rd1")).thenReturn("hashed");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new RuntimeException("SMTP down")).when(emailVerificationService).sendVerificationEmail(any(User.class));
+
+        AuthResponse response = authService.signup(request);
+
+        assertThat(response.accessToken()).isEqualTo("token-value");
     }
 
     @Test
