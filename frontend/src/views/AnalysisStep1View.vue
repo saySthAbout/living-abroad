@@ -1,14 +1,40 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, reactive } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAnalysisStore } from '@/stores/analysis'
 import DisclaimerBox from '@/components/layout/DisclaimerBox.vue'
 import { COUNTRIES } from '@/constants/countries'
+import { apiClient } from '@/api/client'
 
+const route = useRoute()
 const router = useRouter()
 const analysisStore = useAnalysisStore()
 
 const form = reactive({ ...analysisStore.step1Data })
+
+onMounted(async () => {
+  if (route.query.mode !== 'edit') return
+  try {
+    const { data } = await apiClient.get('/api/analyses/latest-input')
+    Object.assign(form, {
+      age: data.age,
+      education: data.education,
+      major: data.major,
+      occupation: data.occupation,
+      experienceYears: data.experienceYears,
+      languageTest: data.languageTest,
+      languageScore: data.languageScore,
+    })
+    analysisStore.saveStep2({
+      careerText: data.careerText,
+      fundsRange: data.fundsRange,
+      familyAccompanied: data.familyAccompanied,
+      preferredCountry: data.preferredCountry,
+    })
+  } catch {
+    // 이전 분석 이력이 없으면(예: 첫 분석 전) 빈 폼으로 그냥 진행한다.
+  }
+})
 
 function goNext() {
   analysisStore.saveStep1({ ...form })

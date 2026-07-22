@@ -4,6 +4,7 @@ import com.livingabroad.backend.dto.analysis.AnalysisCreateRequest;
 import com.livingabroad.backend.dto.analysis.AnalysisCreateResponse;
 import com.livingabroad.backend.dto.analysis.AnalysisDetailResponse;
 import com.livingabroad.backend.dto.analysis.AnalysisHistoryPageResponse;
+import com.livingabroad.backend.dto.analysis.AnalysisInputResponse;
 import com.livingabroad.backend.service.AnalysisService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,11 @@ public class AnalysisController {
     ) {
         AnalysisCreateResponse response = analysisService.createAnalysis(Long.valueOf(jwt.getSubject()), request);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
+    @GetMapping("/latest-input")
+    public ResponseEntity<AnalysisInputResponse> getLatestInput(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(analysisService.getLatestInput(Long.valueOf(jwt.getSubject())));
     }
 
     @GetMapping("/{analysisId}")

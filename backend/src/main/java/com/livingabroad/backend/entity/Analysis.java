@@ -133,6 +133,46 @@ public class Analysis {
         return inputCareerDescription;
     }
 
+    public Short getInputAge() {
+        return inputAge;
+    }
+
+    public String getInputEducationLevel() {
+        return inputEducationLevel;
+    }
+
+    public String getInputMajor() {
+        return inputMajor;
+    }
+
+    public String getInputCurrentOccupation() {
+        return inputCurrentOccupation;
+    }
+
+    public BigDecimal getInputExperienceYears() {
+        return inputExperienceYears;
+    }
+
+    public String getInputLanguageTestType() {
+        return inputLanguageTestType;
+    }
+
+    public BigDecimal getInputLanguageScore() {
+        return inputLanguageScore;
+    }
+
+    public Long getInputAvailableFundsKrw() {
+        return inputAvailableFundsKrw;
+    }
+
+    public boolean isInputFamilyAccompanied() {
+        return inputFamilyAccompanied;
+    }
+
+    public String getInputPreferredCountryCode() {
+        return inputPreferredCountryCode;
+    }
+
     public OffsetDateTime getRequestedAt() {
         return requestedAt;
     }

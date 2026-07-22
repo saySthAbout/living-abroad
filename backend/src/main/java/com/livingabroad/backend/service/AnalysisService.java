@@ -7,6 +7,7 @@ import com.livingabroad.backend.dto.analysis.AnalysisCreateRequest;
 import com.livingabroad.backend.dto.analysis.AnalysisCreateResponse;
 import com.livingabroad.backend.dto.analysis.AnalysisDetailResponse;
 import com.livingabroad.backend.dto.analysis.AnalysisHistoryPageResponse;
+import com.livingabroad.backend.dto.analysis.AnalysisInputResponse;
 import com.livingabroad.backend.entity.Analysis;
 import com.livingabroad.backend.entity.AnalysisCountryResult;
 import com.livingabroad.backend.entity.AnalysisResultReason;
@@ -128,6 +129,26 @@ public class AnalysisService {
     }
 
     @Transactional(readOnly = true)
+    public AnalysisInputResponse getLatestInput(Long userId) {
+        Analysis analysis = analysisRepository.findFirstByUserIdOrderByRequestedAtDesc(userId)
+            .orElseThrow(AnalysisNotFoundException::new);
+
+        return new AnalysisInputResponse(
+            analysis.getInputAge() != null ? analysis.getInputAge().intValue() : null,
+            analysis.getInputEducationLevel(),
+            analysis.getInputMajor(),
+            analysis.getInputCurrentOccupation(),
+            analysis.getInputExperienceYears(),
+            analysis.getInputLanguageTestType(),
+            analysis.getInputLanguageScore(),
+            fundsRangeFromMidpoint(analysis.getInputAvailableFundsKrw()),
+            analysis.isInputFamilyAccompanied(),
+            analysis.getInputPreferredCountryCode() != null ? analysis.getInputPreferredCountryCode() : "ANY",
+            analysis.getInputCareerDescription()
+        );
+    }
+
+    @Transactional(readOnly = true)
     public AnalysisHistoryPageResponse listAnalyses(Long userId, int page, int size) {
         Page<Analysis> analysisPage = analysisRepository.findByUserIdOrderByRequestedAtDesc(
             userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestedAt"))
@@ -232,5 +253,21 @@ public class AnalysisService {
             case "OVER_50M" -> 60_000_000L;
             default -> 0L;
         };
+    }
+
+    // fundsRangeMidpoint()의 역변환. 저장 시 구간 → 중간값으로 변환하기 때문에
+    // 원래 선택했던 구간 문자열은 그 중간값으로부터만 복원할 수 있다.
+    private String fundsRangeFromMidpoint(Long midpoint) {
+        if (midpoint == null) {
+            return null;
+        }
+        if (midpoint <= 5_000_000L) {
+            return "UNDER_10M";
+        } else if (midpoint <= 20_000_000L) {
+            return "10M_30M";
+        } else if (midpoint <= 40_000_000L) {
+            return "30M_50M";
+        }
+        return "OVER_50M";
     }
 }
