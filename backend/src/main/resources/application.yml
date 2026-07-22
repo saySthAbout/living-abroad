@@ -42,3 +42,10 @@ app:
     base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
   email-verification:
     expiration-ms: ${EMAIL_VERIFICATION_EXPIRATION_MS:86400000}
+  rate-limit:
+    auth:
+      limit: ${RATE_LIMIT_AUTH_LIMIT:5}
+      window-ms: ${RATE_LIMIT_AUTH_WINDOW_MS:60000}
+    general:
+      limit: ${RATE_LIMIT_GENERAL_LIMIT:60}
+      window-ms: ${RATE_LIMIT_GENERAL_WINDOW_MS:60000}
