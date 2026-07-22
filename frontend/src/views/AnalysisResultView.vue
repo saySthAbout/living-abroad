@@ -131,10 +131,6 @@ onMounted(async () => {
               - {{ improvement }}
             </span>
           </div>
-
-          <button class="mt-5 w-full rounded-lg bg-navy-950 py-2.5 text-sm font-semibold text-white hover:bg-navy-900">
-            상세 보기 →
-          </button>
         </div>
       </div>
 

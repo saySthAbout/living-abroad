@@ -126,7 +126,7 @@ onUnmounted(() => {
     <p v-if="errorMessage" class="mt-4 text-center text-sm text-red-600">{{ errorMessage }}</p>
 
     <div class="mt-8">
-      <DisclaimerBox text="본 분석은 Living Abroad의 내부 데이터를 기반으로 한 추정치이며, 실제 비자 승인을 보장하지 않습니다. 정보 기준일: YYYY.MM.DD" />
+      <DisclaimerBox text="본 분석은 Living Abroad의 내부 데이터를 기반으로 한 추정치이며, 실제 비자 승인을 보장하지 않습니다. 정보 기준일: 2026.07.21" />
     </div>
   </section>
 </template>

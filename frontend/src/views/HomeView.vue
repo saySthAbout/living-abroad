@@ -92,7 +92,7 @@ const features = [
               <h3 class="font-semibold text-navy-950">{{ country.nameKo }}</h3>
               <p class="mt-2 text-sm text-slate-500">{{ country.description }}</p>
               <div class="mt-4 flex items-center justify-between text-sm">
-                <span class="text-slate-400">정보 기준일: YYYY.MM.DD</span>
+                <span class="text-slate-400">정보 기준일: {{ country.lastVerifiedAt }}</span>
                 <RouterLink :to="authStore.token ? '/analysis/step-1' : '/auth?tab=login'" class="font-semibold text-navy-950">
                   AI 분석하기 →
                 </RouterLink>

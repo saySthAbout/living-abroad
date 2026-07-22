@@ -88,7 +88,7 @@ function goNext() {
       </div>
 
       <div class="mt-6">
-        <DisclaimerBox text="모든 분석 결과는 공신력 있는 내부 분석 알고리즘에 기초하지만, 공식적인 법적 자문을 대체할 수 없습니다. 정보 기준일: YYYY.MM.DD" />
+        <DisclaimerBox text="모든 분석 결과는 공신력 있는 내부 분석 알고리즘에 기초하지만, 공식적인 법적 자문을 대체할 수 없습니다. 정보 기준일: 2026.07.21" />
       </div>
 
       <button class="mt-6 w-full rounded-lg bg-gold-500 py-3 text-sm font-semibold text-navy-950 hover:bg-gold-400" @click="goNext">
