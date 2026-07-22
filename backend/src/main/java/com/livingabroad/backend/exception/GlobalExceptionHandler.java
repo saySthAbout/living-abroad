@@ -1,5 +1,6 @@
 package com.livingabroad.backend.exception;
 
+import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +86,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RestClientException.class)
     public ResponseEntity<ErrorResponse> handleAiServerUnavailable(RestClientException exception, HttpServletRequest request) {
         log.error("AI 서버 호출 실패: {}", request.getRequestURI(), exception);
+        Sentry.captureException(exception);
         return build(HttpStatus.SERVICE_UNAVAILABLE, "AI_SERVER_UNAVAILABLE", "AI 서버에 일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.", request, List.of());
     }
 
@@ -93,6 +95,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception, HttpServletRequest request) {
         String traceId = UUID.randomUUID().toString();
         log.error("예상하지 못한 오류 발생 (traceId={}, path={})", traceId, request.getRequestURI(), exception);
+        Sentry.captureException(exception);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "일시적인 오류가 발생했습니다. 문제가 계속되면 traceId " + traceId + "와 함께 문의해 주세요.", request, List.of());
     }
 

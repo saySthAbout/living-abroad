@@ -34,6 +34,9 @@ services:
       LLM_API_BASE_URL: ${LLM_API_BASE_URL}
       LLM_MODEL_NAME: ${LLM_MODEL_NAME}
       HF_HUB_DISABLE_IMPLICIT_TOKEN: "1"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-local}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.1}
     expose:
       - "8000"
 
@@ -71,6 +74,9 @@ services:
       RATE_LIMIT_AUTH_WINDOW_MS: ${RATE_LIMIT_AUTH_WINDOW_MS:-60000}
       RATE_LIMIT_GENERAL_LIMIT: ${RATE_LIMIT_GENERAL_LIMIT:-60}
       RATE_LIMIT_GENERAL_WINDOW_MS: ${RATE_LIMIT_GENERAL_WINDOW_MS:-60000}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-local}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.1}
     volumes:
       - ./data/database:/data/database:ro
     expose:
@@ -81,6 +87,8 @@ services:
       context: ./frontend
       args:
         VITE_API_BASE_URL: ""
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        VITE_SENTRY_ENVIRONMENT: ${VITE_SENTRY_ENVIRONMENT:-local}
     container_name: living_abroad_frontend
     restart: unless-stopped
     expose:

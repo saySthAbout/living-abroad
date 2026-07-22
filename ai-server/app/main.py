@@ -1,12 +1,24 @@
 import logging
+import os
 import uuid
 
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from app.routers import chat, health, recommend
 
 logger = logging.getLogger("app")
+
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_DSN", ""),
+    environment=os.getenv("SENTRY_ENVIRONMENT", "local"),
+    server_name="living-abroad-ai-server",
+    integrations=[StarletteIntegration(), FastApiIntegration()],
+    traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1")),
+)
 
 app = FastAPI(title="Living Abroad AI Server", version="0.0.1")
 
@@ -21,6 +33,7 @@ async def handle_unexpected_exception(request: Request, exc: Exception) -> JSONR
     클라이언트에는 안전한 메시지만 반환한다 (NFR-03: 개인정보·내부 오류 노출 금지)."""
     trace_id = str(uuid.uuid4())
     logger.exception("예상하지 못한 오류 발생 (traceId=%s, path=%s)", trace_id, request.url.path)
+    sentry_sdk.capture_exception(exc)
     return JSONResponse(
         status_code=500,
         content={

@@ -49,3 +49,9 @@ app:
     general:
       limit: ${RATE_LIMIT_GENERAL_LIMIT:60}
       window-ms: ${RATE_LIMIT_GENERAL_WINDOW_MS:60000}
+
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:local}
+  server-name: living-abroad-backend
+  traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.1}
