@@ -4,7 +4,9 @@ import com.livingabroad.backend.dto.auth.AuthResponse;
 import com.livingabroad.backend.dto.auth.LoginRequest;
 import com.livingabroad.backend.dto.auth.RefreshRequest;
 import com.livingabroad.backend.dto.auth.SignupRequest;
+import com.livingabroad.backend.dto.auth.VerifyEmailRequest;
 import com.livingabroad.backend.service.AuthService;
+import com.livingabroad.backend.service.EmailVerificationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, EmailVerificationService emailVerificationService) {
         this.authService = authService;
+        this.emailVerificationService = emailVerificationService;
     }
 
     @PostMapping("/signup")
@@ -41,6 +45,12 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequest request) {
         authService.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        emailVerificationService.verify(request.token());
         return ResponseEntity.noContent().build();
     }
 }

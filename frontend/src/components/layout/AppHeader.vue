@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
+const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+
+const isLoginTabActive = computed(() => route.name === 'AUTH' && route.query.tab !== 'signup')
 
 function handleLogout() {
   authStore.logout()
@@ -23,10 +27,15 @@ function handleLogout() {
       </nav>
       <div class="flex items-center gap-3">
         <template v-if="!authStore.token">
-          <RouterLink to="/auth?tab=login" class="text-sm font-medium text-slate-600 hover:text-navy-950">로그인</RouterLink>
+          <RouterLink
+            to="/auth?tab=login"
+            :class="isLoginTabActive ? 'rounded-lg bg-navy-950 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900' : 'text-sm font-medium text-slate-600 hover:text-navy-950'"
+          >
+            로그인
+          </RouterLink>
           <RouterLink
             to="/auth?tab=signup"
-            class="rounded-lg bg-navy-950 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900"
+            :class="isLoginTabActive ? 'text-sm font-medium text-slate-600 hover:text-navy-950' : 'rounded-lg bg-navy-950 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900'"
           >
             회원가입
           </RouterLink>

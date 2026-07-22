@@ -6,6 +6,7 @@ interface AuthUser {
   id: number
   name: string
   email: string
+  emailVerified: boolean
 }
 
 interface LoginPayload {
@@ -60,6 +61,10 @@ export const useAuthStore = defineStore('auth', () => {
     return data.accessToken
   }
 
+  async function resendVerificationEmail() {
+    await apiClient.post('/api/users/me/resend-verification')
+  }
+
   function logout() {
     const rawRefreshToken = refreshToken.value
     token.value = null
@@ -73,5 +78,5 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { token, refreshToken, user, login, signup, loadUser, refresh, logout }
+  return { token, refreshToken, user, login, signup, loadUser, refresh, resendVerificationEmail, logout }
 })

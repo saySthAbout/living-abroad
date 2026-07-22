@@ -44,6 +44,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", exception.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidVerificationToken(InvalidVerificationTokenException exception, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_TOKEN", exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(EmailAlreadyVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyVerified(EmailAlreadyVerifiedException exception, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "EMAIL_ALREADY_VERIFIED", exception.getMessage(), request, List.of());
+    }
+
     @ExceptionHandler(AnalysisNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAnalysisNotFound(AnalysisNotFoundException exception, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, "ANALYSIS_NOT_FOUND", exception.getMessage(), request, List.of());
