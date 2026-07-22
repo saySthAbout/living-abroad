@@ -2,15 +2,39 @@ import logging
 import os
 import uuid
 
+import httpx
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.starlette import StarletteIntegration
+from starlette.background import BackgroundTask
 
 from app.routers import chat, health, recommend
 
 logger = logging.getLogger("app")
+
+SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "")
+APP_ENVIRONMENT = os.getenv("SENTRY_ENVIRONMENT", "local")
+
+
+# Slack Incoming Webhook URL은 그 자체로 비밀값이라 서버 사이드에서만 호출한다(프론트엔드 노출 금지).
+async def notify_slack(trace_id: str, path: str, detail: str) -> None:
+    if not SLACK_WEBHOOK_URL:
+        return
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            await client.post(
+                SLACK_WEBHOOK_URL,
+                json={
+                    "text": (
+                        f":rotating_light: *AI 서버 오류*\n"
+                        f"환경: {APP_ENVIRONMENT}\n경로: {path}\ntraceId: {trace_id}\n{detail}"
+                    )
+                },
+            )
+    except Exception:
+        logger.warning("Slack 알림 발송 실패", exc_info=True)
 
 sentry_sdk.init(
     dsn=os.getenv("SENTRY_DSN", ""),
@@ -43,4 +67,5 @@ async def handle_unexpected_exception(request: Request, exc: Exception) -> JSONR
                 "traceId": trace_id,
             }
         },
+        background=BackgroundTask(notify_slack, trace_id, str(request.url.path), str(exc)),
     )

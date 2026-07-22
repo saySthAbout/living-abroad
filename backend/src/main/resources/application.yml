@@ -49,6 +49,9 @@ app:
     general:
       limit: ${RATE_LIMIT_GENERAL_LIMIT:60}
       window-ms: ${RATE_LIMIT_GENERAL_WINDOW_MS:60000}
+  environment: ${SENTRY_ENVIRONMENT:local}
+  slack:
+    webhook-url: ${SLACK_WEBHOOK_URL:}
 
 sentry:
   dsn: ${SENTRY_DSN:}

@@ -1,5 +1,6 @@
 package com.livingabroad.backend.exception;
 
+import com.livingabroad.backend.service.SlackNotifier;
 import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -20,6 +21,12 @@ import java.util.UUID;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    private final SlackNotifier slackNotifier;
+
+    public GlobalExceptionHandler(SlackNotifier slackNotifier) {
+        this.slackNotifier = slackNotifier;
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException exception, HttpServletRequest request) {
@@ -87,6 +94,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAiServerUnavailable(RestClientException exception, HttpServletRequest request) {
         log.error("AI 서버 호출 실패: {}", request.getRequestURI(), exception);
         Sentry.captureException(exception);
+        slackNotifier.notifyError("AI 서버 연결 실패", request.getRequestURI(), "-", exception.getMessage());
         return build(HttpStatus.SERVICE_UNAVAILABLE, "AI_SERVER_UNAVAILABLE", "AI 서버에 일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.", request, List.of());
     }
 
@@ -96,6 +104,7 @@ public class GlobalExceptionHandler {
         String traceId = UUID.randomUUID().toString();
         log.error("예상하지 못한 오류 발생 (traceId={}, path={})", traceId, request.getRequestURI(), exception);
         Sentry.captureException(exception);
+        slackNotifier.notifyError("예상하지 못한 서버 오류", request.getRequestURI(), traceId, exception.toString());
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "일시적인 오류가 발생했습니다. 문제가 계속되면 traceId " + traceId + "와 함께 문의해 주세요.", request, List.of());
     }
 
