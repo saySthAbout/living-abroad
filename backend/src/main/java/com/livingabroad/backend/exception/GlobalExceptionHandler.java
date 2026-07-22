@@ -39,6 +39,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", exception.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException exception, HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", exception.getMessage(), request, List.of());
+    }
+
     @ExceptionHandler(AnalysisNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAnalysisNotFound(AnalysisNotFoundException exception, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, "ANALYSIS_NOT_FOUND", exception.getMessage(), request, List.of());

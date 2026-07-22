@@ -2,6 +2,7 @@ package com.livingabroad.backend.controller;
 
 import com.livingabroad.backend.dto.auth.AuthResponse;
 import com.livingabroad.backend.dto.auth.LoginRequest;
+import com.livingabroad.backend.dto.auth.RefreshRequest;
 import com.livingabroad.backend.dto.auth.SignupRequest;
 import com.livingabroad.backend.service.AuthService;
 import jakarta.validation.Valid;
@@ -30,5 +31,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        return ResponseEntity.ok(authService.refresh(request.refreshToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequest request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 }
