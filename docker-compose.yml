@@ -83,8 +83,24 @@ services:
       - frontend
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot_www:/var/www/certbot:ro
+      - certbot_conf:/etc/letsencrypt:ro
+
+  # 인증서 발급/갱신 전용 — 평소엔 대기만 하고, `docker compose run --rm certbot ...`로
+  # 수동 실행한다 (docker-compose.yml에 별도 커맨드가 없으면 실행 즉시 종료하고 재시작을
+  # 반복하므로 entrypoint를 무한 대기로 덮어쓴다).
+  certbot:
+    image: certbot/certbot
+    container_name: living_abroad_certbot
+    entrypoint: ["sh", "-c", "trap exit TERM; while :; do sleep 6h; done"]
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
 
 volumes:
   living_abroad_db_data:
+  certbot_www:
+  certbot_conf:
