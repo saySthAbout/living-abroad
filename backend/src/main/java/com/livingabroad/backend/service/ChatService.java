@@ -157,7 +157,7 @@ public class ChatService {
     @Transactional(readOnly = true)
     public ChatSessionHistoryPageResponse listSessions(Long userId, String countryCode, String keyword, int page, int size) {
         Page<ChatSession> result = chatSessionRepository.search(
-            userId, blankToNull(countryCode), blankToNull(keyword), PageRequest.of(page, size)
+            userId, blankToEmpty(countryCode), blankToEmpty(keyword), PageRequest.of(page, size)
         );
 
         List<ChatSessionHistoryPageResponse.SessionSummary> items = result.getContent().stream()
@@ -173,8 +173,8 @@ public class ChatService {
         return new ChatSessionHistoryPageResponse(page, size, result.getTotalElements(), items);
     }
 
-    private String blankToNull(String value) {
-        return (value == null || value.isBlank()) ? null : value;
+    private String blankToEmpty(String value) {
+        return (value == null || value.isBlank()) ? "" : value;
     }
 
     private ChatSession findOwnedSession(Long userId, Long sessionId) {
