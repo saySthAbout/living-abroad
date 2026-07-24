@@ -44,7 +44,7 @@ app:
   ai-server:
     base-url: ${AI_SERVER_INTERNAL_URL:http://localhost:8000}
     connect-timeout-ms: ${AI_SERVER_CONNECT_TIMEOUT_MS:5000}
-    read-timeout-ms: ${AI_SERVER_READ_TIMEOUT_MS:45000}
+    read-timeout-ms: ${AI_SERVER_READ_TIMEOUT_MS:100000}
   mail:
     from: ${MAIL_FROM:${MAIL_USERNAME:}}
   frontend:
