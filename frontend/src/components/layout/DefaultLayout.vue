@@ -6,11 +6,13 @@ import EmailVerificationBanner from './EmailVerificationBanner.vue'
 
 <template>
   <div class="flex min-h-screen flex-col bg-white">
-    <AppHeader />
-    <EmailVerificationBanner />
+    <div class="print:hidden">
+      <AppHeader />
+      <EmailVerificationBanner />
+    </div>
     <main class="flex-1">
       <slot />
     </main>
-    <AppFooter />
+    <AppFooter class="print:hidden" />
   </div>
 </template>

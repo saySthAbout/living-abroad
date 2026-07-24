@@ -49,8 +49,38 @@ const checkedItems = ref<boolean[]>(checklistItems.map(() => false))
 const result = computed(() => analysisStore.analysisResult as unknown as AnalysisDetail | null)
 const sortedResults = computed(() => [...(result.value?.results ?? [])].sort((a, b) => a.rank - b.rank))
 
+const shareStatus = ref<'idle' | 'creating' | 'ready' | 'error'>('idle')
+const shareUrl = ref('')
+const shareErrorMessage = ref('')
+const copyLabel = ref('링크 복사')
+
 function flagFor(code: string) {
   return COUNTRIES.find((country) => country.code === code)?.flag ?? '🌐'
+}
+
+function exportPdf() {
+  window.print()
+}
+
+async function createShare() {
+  shareStatus.value = 'creating'
+  shareErrorMessage.value = ''
+  try {
+    const token = await analysisStore.createShareLink(Number(route.params.id))
+    shareUrl.value = `${window.location.origin}/shared/${token}`
+    shareStatus.value = 'ready'
+  } catch (error) {
+    shareStatus.value = 'error'
+    shareErrorMessage.value = getErrorMessage(error, '공유 링크 생성에 실패했습니다.')
+  }
+}
+
+async function copyShareUrl() {
+  await navigator.clipboard.writeText(shareUrl.value)
+  copyLabel.value = '복사됨!'
+  setTimeout(() => {
+    copyLabel.value = '링크 복사'
+  }, 2000)
 }
 
 onMounted(async () => {
@@ -170,7 +200,13 @@ onMounted(async () => {
 
       <div class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-6">
         <DisclaimerBox :text="result.disclaimer ?? '본 점수는 실제 비자 승인 확률이 아닙니다.'" />
-        <div class="flex shrink-0 gap-3">
+        <div class="flex shrink-0 flex-wrap gap-3 print:hidden">
+          <button class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600" @click="exportPdf">
+            🖨 PDF로 저장
+          </button>
+          <button class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600" @click="createShare">
+            🔗 공유하기
+          </button>
           <button class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600" @click="router.push('/analysis/step-1')">
             ↻ 다시 분석하기
           </button>
@@ -178,6 +214,22 @@ onMounted(async () => {
             💬 AI에게 결과 질문하기
           </button>
         </div>
+      </div>
+
+      <div v-if="shareStatus !== 'idle'" class="mt-4 rounded-lg border border-slate-200 bg-soft-50 p-4 text-sm print:hidden">
+        <template v-if="shareStatus === 'creating'">공유 링크를 만드는 중...</template>
+        <template v-else-if="shareStatus === 'ready'">
+          <p class="text-slate-500">이 링크가 있는 사람은 로그인 없이 이 결과를 볼 수 있습니다.</p>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <input :value="shareUrl" readonly class="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-600" />
+            <button class="shrink-0 rounded-lg bg-navy-950 px-3 py-2 text-xs font-semibold text-white hover:bg-navy-900" @click="copyShareUrl">
+              {{ copyLabel }}
+            </button>
+          </div>
+        </template>
+        <template v-else>
+          <p class="text-red-600">{{ shareErrorMessage }}</p>
+        </template>
       </div>
     </template>
   </section>
