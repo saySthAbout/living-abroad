@@ -30,6 +30,9 @@ public class ChatSession {
     @Column(name = "session_title")
     private String sessionTitle;
 
+    @Column(name = "country_code")
+    private String countryCode;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -39,11 +42,12 @@ public class ChatSession {
     protected ChatSession() {
     }
 
-    public ChatSession(Long userId, Long analysisId, Long visaProgramId, String sessionTitle) {
+    public ChatSession(Long userId, Long analysisId, Long visaProgramId, String sessionTitle, String countryCode) {
         this.userId = userId;
         this.analysisId = analysisId;
         this.visaProgramId = visaProgramId;
         this.sessionTitle = sessionTitle;
+        this.countryCode = countryCode;
     }
 
     public Long getSessionId() {
@@ -56,6 +60,10 @@ public class ChatSession {
 
     public String getSessionTitle() {
         return sessionTitle;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
     }
 
     public OffsetDateTime getCreatedAt() {

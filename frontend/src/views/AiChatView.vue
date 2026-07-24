@@ -15,6 +15,14 @@ interface ChatMessage {
   sources?: ChatSource[]
 }
 
+interface ChatSessionSummary {
+  sessionId: number
+  sessionTitle: string
+  countryCode: 'CAN' | 'AUS' | 'GBR' | null
+  createdAt: string
+  updatedAt: string
+}
+
 const countryCode = ref<'CAN' | 'AUS' | 'GBR'>('CAN')
 const question = ref('')
 const errorMessage = ref('')
@@ -22,12 +30,26 @@ const sending = ref(false)
 const scrollAnchor = ref<HTMLElement | null>(null)
 const sessionId = ref<number | null>(null)
 
-const messages = ref<ChatMessage[]>([
-  {
+const countryFlags: Record<string, string> = { CAN: '🇨🇦', AUS: '🇦🇺', GBR: '🇬🇧' }
+function countryFlag(code: string | null) {
+  return code ? (countryFlags[code] ?? '🌐') : '🌐'
+}
+
+function greetingMessage(): ChatMessage {
+  return {
     role: 'ASSISTANT',
     content: '안녕하세요! 해외 이주 및 비자 관련하여 궁금한 점을 물어보세요. 데이터에 기반하여 답변해 드립니다.',
-  },
-])
+  }
+}
+
+const messages = ref<ChatMessage[]>([greetingMessage()])
+
+const historyOpen = ref(false)
+const historyKeyword = ref('')
+const historyCountry = ref('')
+const historyItems = ref<ChatSessionSummary[]>([])
+const historyLoading = ref(false)
+const historyError = ref('')
 
 const starterChips = ['캐나다 Express Entry 기본 자격', '호주 Subclass 189 준비 서류', '영국 Skilled Worker 스폰서 요건']
 const followUpChips = ['기본 자격 요건', '준비 필요 서류', '영어 점수 기준', '신청 절차']
@@ -65,6 +87,59 @@ async function sendQuestion(text?: string) {
     await scrollToBottom()
   }
 }
+
+async function toggleHistory() {
+  historyOpen.value = !historyOpen.value
+  if (historyOpen.value && historyItems.value.length === 0) {
+    await searchHistory()
+  }
+}
+
+async function searchHistory() {
+  historyLoading.value = true
+  historyError.value = ''
+  try {
+    const { data } = await apiClient.get('/api/chat/sessions', {
+      params: {
+        keyword: historyKeyword.value || undefined,
+        countryCode: historyCountry.value || undefined,
+        page: 0,
+        size: 20,
+      },
+    })
+    historyItems.value = data.items ?? []
+  } catch (error) {
+    historyError.value = getErrorMessage(error, '상담 기록을 불러오지 못했습니다.')
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+async function loadSession(id: number) {
+  historyError.value = ''
+  try {
+    const { data } = await apiClient.get(`/api/chat/sessions/${id}`)
+    messages.value = (data.messages ?? []).map(
+      (m: { role: 'USER' | 'ASSISTANT'; content: string; answerable?: boolean; sources?: ChatSource[] }) => ({
+        role: m.role,
+        content: m.content,
+        answerable: m.answerable,
+        sources: m.sources,
+      }),
+    )
+    sessionId.value = id
+    historyOpen.value = false
+    await scrollToBottom()
+  } catch (error) {
+    historyError.value = getErrorMessage(error, '상담 기록을 불러오지 못했습니다.')
+  }
+}
+
+function startNewChat() {
+  sessionId.value = null
+  messages.value = [greetingMessage()]
+  historyOpen.value = false
+}
 </script>
 
 <template>
@@ -81,11 +156,71 @@ async function sendQuestion(text?: string) {
       </div>
     </div>
 
-    <select v-model="countryCode" class="mt-4 rounded-lg border border-slate-300 px-3 py-2 text-sm">
-      <option value="CAN">캐나다</option>
-      <option value="AUS">호주</option>
-      <option value="GBR">영국</option>
-    </select>
+    <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
+      <select v-model="countryCode" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <option value="CAN">캐나다</option>
+        <option value="AUS">호주</option>
+        <option value="GBR">영국</option>
+      </select>
+      <div class="flex gap-2">
+        <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:border-navy-700"
+          @click="startNewChat"
+        >
+          + 새 대화
+        </button>
+        <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:border-navy-700"
+          @click="toggleHistory"
+        >
+          📜 히스토리
+        </button>
+      </div>
+    </div>
+
+    <div v-if="historyOpen" class="mt-3 rounded-xl border border-slate-200 p-4">
+      <div class="flex flex-wrap gap-2">
+        <input
+          v-model="historyKeyword"
+          type="text"
+          placeholder="질문이나 답변 내용 검색..."
+          class="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-navy-700 focus:outline-none"
+          @keyup.enter="searchHistory"
+        />
+        <select v-model="historyCountry" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <option value="">전체 국가</option>
+          <option value="CAN">캐나다</option>
+          <option value="AUS">호주</option>
+          <option value="GBR">영국</option>
+        </select>
+        <button
+          type="button"
+          class="rounded-lg bg-navy-950 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900"
+          @click="searchHistory"
+        >
+          검색
+        </button>
+      </div>
+
+      <p v-if="historyLoading" class="mt-3 text-xs text-slate-400">불러오는 중...</p>
+      <p v-else-if="historyError" class="mt-3 text-xs text-red-600">{{ historyError }}</p>
+      <p v-else-if="historyItems.length === 0" class="mt-3 text-xs text-slate-400">일치하는 상담 기록이 없습니다.</p>
+      <ul v-else class="mt-3 max-h-64 space-y-1 overflow-y-auto">
+        <li v-for="item in historyItems" :key="item.sessionId">
+          <button
+            type="button"
+            class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-soft-50"
+            :class="item.sessionId === sessionId ? 'bg-soft-50' : ''"
+            @click="loadSession(item.sessionId)"
+          >
+            <span class="truncate">{{ countryFlag(item.countryCode) }} {{ item.sessionTitle }}</span>
+            <span class="shrink-0 text-xs text-slate-400">{{ item.updatedAt?.slice(0, 10) }}</span>
+          </button>
+        </li>
+      </ul>
+    </div>
 
     <div class="mt-4 max-h-[480px] space-y-4 overflow-y-auto rounded-xl border border-slate-200 p-5">
       <template v-for="(message, index) in messages" :key="index">

@@ -12,12 +12,18 @@ import com.livingabroad.backend.repository.ChatMessageSourceRepository;
 import com.livingabroad.backend.repository.ChatSessionRepository;
 import com.livingabroad.backend.repository.PolicyChunkRepository;
 import com.livingabroad.backend.repository.PolicyDocumentRepository;
+import com.livingabroad.backend.dto.chat.ChatSessionHistoryPageResponse;
 import com.livingabroad.backend.repository.VisaProgramRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -27,6 +33,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -111,8 +119,39 @@ class ChatServiceTest {
             .isInstanceOf(ChatSessionNotFoundException.class);
     }
 
+    @Test
+    void listSessionsPassesCountryAndKeywordFiltersThrough() throws Exception {
+        ChatSession session = newSession(1L, 100L);
+        Page<ChatSession> page = new PageImpl<>(List.of(session), PageRequest.of(0, 10), 1);
+        when(chatSessionRepository.search(eq(100L), eq("CAN"), eq("Express Entry"), any(Pageable.class)))
+            .thenReturn(page);
+
+        ChatSessionHistoryPageResponse response = chatService.listSessions(100L, "CAN", "Express Entry", 0, 10);
+
+        assertThat(response.totalElements()).isEqualTo(1);
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).sessionId()).isEqualTo(1L);
+        assertThat(response.items().get(0).countryCode()).isEqualTo("CAN");
+    }
+
+    @Test
+    void listSessionsTreatsBlankFiltersAsNoFilter() {
+        Page<ChatSession> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
+        when(chatSessionRepository.search(eq(100L), isNull(), isNull(), any(Pageable.class)))
+            .thenReturn(emptyPage);
+
+        chatService.listSessions(100L, "", "  ", 0, 10);
+
+        ArgumentCaptor<String> countryCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> keywordCaptor = ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(chatSessionRepository)
+            .search(eq(100L), countryCaptor.capture(), keywordCaptor.capture(), any(Pageable.class));
+        assertThat(countryCaptor.getValue()).isNull();
+        assertThat(keywordCaptor.getValue()).isNull();
+    }
+
     private ChatSession newSession(Long sessionId, Long userId) throws Exception {
-        ChatSession session = new ChatSession(userId, null, null, "title");
+        ChatSession session = new ChatSession(userId, null, null, "title", "CAN");
         setField(session, "sessionId", sessionId);
         return session;
     }

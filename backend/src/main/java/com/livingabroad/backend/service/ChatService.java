@@ -5,6 +5,7 @@ import com.livingabroad.backend.dto.ai.AiRagRequestDto;
 import com.livingabroad.backend.dto.ai.AiRagResponseDto;
 import com.livingabroad.backend.dto.chat.ChatAnswerResponse;
 import com.livingabroad.backend.dto.chat.ChatQuestionRequest;
+import com.livingabroad.backend.dto.chat.ChatSessionHistoryPageResponse;
 import com.livingabroad.backend.dto.chat.ChatSessionResponse;
 import com.livingabroad.backend.entity.ChatMessage;
 import com.livingabroad.backend.entity.ChatMessageSource;
@@ -19,6 +20,8 @@ import com.livingabroad.backend.repository.ChatSessionRepository;
 import com.livingabroad.backend.repository.PolicyChunkRepository;
 import com.livingabroad.backend.repository.PolicyDocumentRepository;
 import com.livingabroad.backend.repository.VisaProgramRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +66,7 @@ public class ChatService {
     public ChatAnswerResponse askQuestion(Long userId, ChatQuestionRequest request) {
         ChatSession session = request.sessionId() != null
             ? findOwnedSession(userId, request.sessionId())
-            : chatSessionRepository.save(new ChatSession(userId, request.analysisId(), null, truncateTitle(request.question())));
+            : chatSessionRepository.save(new ChatSession(userId, request.analysisId(), null, truncateTitle(request.question()), request.countryCode()));
 
         chatMessageRepository.save(new ChatMessage(session.getSessionId(), "USER", request.question(), null));
 
@@ -149,6 +152,29 @@ public class ChatService {
             sources,
             message.getCreatedAt()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public ChatSessionHistoryPageResponse listSessions(Long userId, String countryCode, String keyword, int page, int size) {
+        Page<ChatSession> result = chatSessionRepository.search(
+            userId, blankToNull(countryCode), blankToNull(keyword), PageRequest.of(page, size)
+        );
+
+        List<ChatSessionHistoryPageResponse.SessionSummary> items = result.getContent().stream()
+            .map(session -> new ChatSessionHistoryPageResponse.SessionSummary(
+                session.getSessionId(),
+                session.getSessionTitle(),
+                session.getCountryCode(),
+                session.getCreatedAt(),
+                session.getUpdatedAt()
+            ))
+            .toList();
+
+        return new ChatSessionHistoryPageResponse(page, size, result.getTotalElements(), items);
+    }
+
+    private String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value;
     }
 
     private ChatSession findOwnedSession(Long userId, Long sessionId) {
