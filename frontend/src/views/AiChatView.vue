@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { apiClient, getErrorMessage } from '@/api/client'
 
 interface ChatSource {
@@ -23,6 +24,8 @@ interface ChatSessionSummary {
   updatedAt: string
 }
 
+const { t } = useI18n()
+
 const countryCode = ref<'CAN' | 'AUS' | 'GBR'>('CAN')
 const question = ref('')
 const errorMessage = ref('')
@@ -38,7 +41,7 @@ function countryFlag(code: string | null) {
 function greetingMessage(): ChatMessage {
   return {
     role: 'ASSISTANT',
-    content: '안녕하세요! 해외 이주 및 비자 관련하여 궁금한 점을 물어보세요. 데이터에 기반하여 답변해 드립니다.',
+    content: t('chat.greeting'),
   }
 }
 
@@ -51,8 +54,8 @@ const historyItems = ref<ChatSessionSummary[]>([])
 const historyLoading = ref(false)
 const historyError = ref('')
 
-const starterChips = ['캐나다 Express Entry 기본 자격', '호주 Subclass 189 준비 서류', '영국 Skilled Worker 스폰서 요건']
-const followUpChips = ['기본 자격 요건', '준비 필요 서류', '영어 점수 기준', '신청 절차']
+const starterChips = computed(() => [t('chat.starter1'), t('chat.starter2'), t('chat.starter3')])
+const followUpChips = computed(() => [t('chat.followUp1'), t('chat.followUp2'), t('chat.followUp3'), t('chat.followUp4')])
 
 async function scrollToBottom() {
   await nextTick()
@@ -81,7 +84,7 @@ async function sendQuestion(text?: string) {
       sources: data.sources,
     })
   } catch (error) {
-    errorMessage.value = getErrorMessage(error, '답변 생성 중 오류가 발생했습니다.')
+    errorMessage.value = getErrorMessage(error, t('chat.errorFallback'))
   } finally {
     sending.value = false
     await scrollToBottom()
@@ -109,7 +112,7 @@ async function searchHistory() {
     })
     historyItems.value = data.items ?? []
   } catch (error) {
-    historyError.value = getErrorMessage(error, '상담 기록을 불러오지 못했습니다.')
+    historyError.value = getErrorMessage(error, t('chat.historyErrorFallback'))
   } finally {
     historyLoading.value = false
   }
@@ -131,7 +134,7 @@ async function loadSession(id: number) {
     historyOpen.value = false
     await scrollToBottom()
   } catch (error) {
-    historyError.value = getErrorMessage(error, '상담 기록을 불러오지 못했습니다.')
+    historyError.value = getErrorMessage(error, t('chat.historyErrorFallback'))
   }
 }
 
@@ -147,20 +150,19 @@ function startNewChat() {
     <div class="flex items-start gap-3 rounded-lg border border-soft-100 bg-soft-50 px-4 py-3 text-sm">
       <span aria-hidden="true">ⓘ</span>
       <div>
-        <p class="font-semibold text-navy-950">이주 전문가 AI 상담</p>
+        <p class="font-semibold text-navy-950">{{ t('chat.expertTitle') }}</p>
         <p class="mt-1 text-slate-500">
-          Living Abroad AI는 캐나다 Express Entry, 호주 Subclass 189, 영국 Skilled Worker Visa에 관한 공식
-          정책 정보를 제공합니다.
+          {{ t('chat.expertDesc') }}
         </p>
-        <p class="mt-1 text-xs text-slate-400">* 타 국가 또는 지원 범위를 벗어난 질문은 정보 제공이 제한될 수 있습니다.</p>
+        <p class="mt-1 text-xs text-slate-400">{{ t('chat.expertNote') }}</p>
       </div>
     </div>
 
     <div class="mt-4 flex flex-wrap items-center justify-between gap-2">
       <select v-model="countryCode" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-        <option value="CAN">캐나다</option>
-        <option value="AUS">호주</option>
-        <option value="GBR">영국</option>
+        <option value="CAN">{{ t('step2.countryCan') }}</option>
+        <option value="AUS">{{ t('step2.countryAus') }}</option>
+        <option value="GBR">{{ t('step2.countryGbr') }}</option>
       </select>
       <div class="flex gap-2">
         <button
@@ -168,14 +170,14 @@ function startNewChat() {
           class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:border-navy-700"
           @click="startNewChat"
         >
-          + 새 대화
+          {{ t('chat.newChat') }}
         </button>
         <button
           type="button"
           class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:border-navy-700"
           @click="toggleHistory"
         >
-          📜 히스토리
+          {{ t('chat.history') }}
         </button>
       </div>
     </div>
@@ -185,28 +187,28 @@ function startNewChat() {
         <input
           v-model="historyKeyword"
           type="text"
-          placeholder="질문이나 답변 내용 검색..."
+          :placeholder="t('chat.searchPlaceholder')"
           class="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-navy-700 focus:outline-none"
           @keyup.enter="searchHistory"
         />
         <select v-model="historyCountry" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-          <option value="">전체 국가</option>
-          <option value="CAN">캐나다</option>
-          <option value="AUS">호주</option>
-          <option value="GBR">영국</option>
+          <option value="">{{ t('chat.allCountries') }}</option>
+          <option value="CAN">{{ t('step2.countryCan') }}</option>
+          <option value="AUS">{{ t('step2.countryAus') }}</option>
+          <option value="GBR">{{ t('step2.countryGbr') }}</option>
         </select>
         <button
           type="button"
           class="rounded-lg bg-navy-950 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-900"
           @click="searchHistory"
         >
-          검색
+          {{ t('chat.search') }}
         </button>
       </div>
 
-      <p v-if="historyLoading" class="mt-3 text-xs text-slate-400">불러오는 중...</p>
+      <p v-if="historyLoading" class="mt-3 text-xs text-slate-400">{{ t('chat.loadingHistory') }}</p>
       <p v-else-if="historyError" class="mt-3 text-xs text-red-600">{{ historyError }}</p>
-      <p v-else-if="historyItems.length === 0" class="mt-3 text-xs text-slate-400">일치하는 상담 기록이 없습니다.</p>
+      <p v-else-if="historyItems.length === 0" class="mt-3 text-xs text-slate-400">{{ t('chat.noHistory') }}</p>
       <ul v-else class="mt-3 max-h-64 space-y-1 overflow-y-auto">
         <li v-for="item in historyItems" :key="item.sessionId">
           <button
@@ -225,7 +227,7 @@ function startNewChat() {
     <div class="mt-4 max-h-[480px] space-y-4 overflow-y-auto rounded-xl border border-slate-200 p-5">
       <template v-for="(message, index) in messages" :key="index">
         <div v-if="message.role === 'ASSISTANT'" class="max-w-[85%]">
-          <p class="mb-1 flex items-center gap-1 text-xs font-semibold text-navy-950">🤖 Living Abroad AI</p>
+          <p class="mb-1 flex items-center gap-1 text-xs font-semibold text-navy-950">{{ t('chat.assistantName') }}</p>
           <div class="rounded-xl rounded-tl-none bg-soft-50 px-4 py-3 text-sm text-navy-950">
             <p class="whitespace-pre-line">{{ message.content }}</p>
             <div v-if="message.sources?.length" class="mt-3 space-y-1 border-t border-slate-200 pt-2">
@@ -241,8 +243,8 @@ function startNewChat() {
               </a>
             </div>
             <div class="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-400">
-              <span v-if="message.answerable === false" class="rounded bg-amber-50 px-1.5 py-0.5 text-amber-600">근거 문서 없음</span>
-              <span>본 답변은 법률 자문이 아닙니다.</span>
+              <span v-if="message.answerable === false" class="rounded bg-amber-50 px-1.5 py-0.5 text-amber-600">{{ t('chat.noEvidence') }}</span>
+              <span>{{ t('chat.notLegalAdvice') }}</span>
             </div>
           </div>
           <div v-if="index === 0" class="mt-2 flex flex-wrap gap-2">
@@ -272,7 +274,7 @@ function startNewChat() {
           </div>
         </div>
       </template>
-      <p v-if="sending" class="text-xs text-slate-400">답변을 생성하고 있습니다…</p>
+      <p v-if="sending" class="text-xs text-slate-400">{{ t('chat.generating') }}</p>
       <div ref="scrollAnchor" />
     </div>
 
@@ -283,15 +285,15 @@ function startNewChat() {
         maxlength="1000"
         minlength="2"
         class="flex-1 rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none"
-        placeholder="이주 계획에 대해 무엇이든 물어보세요..."
+        :placeholder="t('chat.inputPlaceholder')"
       />
       <button type="submit" class="rounded-lg bg-navy-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy-900" :disabled="sending">
-        전송 ➤
+        {{ t('chat.send') }}
       </button>
     </form>
     <p v-if="errorMessage" class="mt-2 text-sm text-red-600">{{ errorMessage }}</p>
     <p class="mt-3 text-center text-xs text-slate-400">
-      AI가 제공하는 정보는 참고용이며, 최종 결정 전 공식 기관 또는 전문가의 확인을 권장합니다.
+      {{ t('chat.footerNote') }}
     </p>
   </section>
 </template>
