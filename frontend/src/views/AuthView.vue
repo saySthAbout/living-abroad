@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { getErrorMessage } from '@/api/client'
 
@@ -82,7 +82,7 @@ async function submitSignup() {
         <label class="block">
           <div class="flex items-center justify-between">
             <span class="text-sm font-medium text-navy-950">비밀번호</span>
-            <span class="text-xs text-navy-700">비밀번호 찾기</span>
+            <RouterLink to="/forgot-password" class="text-xs text-navy-700 hover:underline">비밀번호 찾기</RouterLink>
           </div>
           <input
             v-model="loginForm.password"

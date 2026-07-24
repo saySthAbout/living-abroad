@@ -75,4 +75,8 @@ public class User {
     public void markEmailVerified() {
         this.emailVerified = true;
     }
+
+    public void changePassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+    }
 }
