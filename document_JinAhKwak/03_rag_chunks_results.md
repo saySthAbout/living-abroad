@@ -4,11 +4,12 @@
 - 그래프: `output/03_rag_chunks/01_chunk_length_distribution.png`
 - 저장 위치: PostgreSQL `policy_documents` / `policy_chunks` 테이블 (pgvector, `V2__add_pgvector.sql`)
 
-> 2026-07-21 업데이트: 초기 8건(국가당 2~3건)에서 17건(국가당 5~6건)으로 문서를 확장했다. 아래 내용은 확장 후 기준.
+> 2026-07-21 업데이트: 초기 8건(국가당 2~3건)에서 17건(국가당 5~6건)으로 문서를 확장했다.
+> 2026-07-24 업데이트: 17건에서 21건(CAN 8, AUS 5, GBR 8)으로 재확장했다. 아래 내용은 확장 후 기준.
 
 ## 데이터 확인
 
-캐나다·호주·영국 공식 이민 사이트에서 브라우저로 직접 접속해 문서 17건의 본문을 수집했다 (requests 기반 스크래핑은
+캐나다·호주·영국 공식 이민 사이트에서 브라우저로 직접 접속해 문서 21건의 본문을 수집했다 (requests 기반 스크래핑은
 canada.ca가 요청을 자주 차단해 불안정했다).
 
 | 국가 | 문서 | 출처 |
@@ -19,6 +20,8 @@ canada.ca가 요청을 자주 차단해 불안정했다).
 | CAN | Comprehensive Ranking System (CRS) 기준 | canada.ca |
 | CAN | Express Entry 자금 증빙 (Proof of Funds) | canada.ca |
 | CAN | Express Entry 언어 시험 요건 | canada.ca |
+| CAN | Federal Skilled Worker Program 자격요건 (신규) | canada.ca |
+| CAN | 학력 인증 ECA 기준 (신규) | canada.ca |
 | AUS | Skilled Independent Visa Subclass 189 전체 안내 | immi.homeaffairs.gov.au |
 | AUS | Subclass 189 Points-tested Stream 서류·EOI·기술심사 안내 | immi.homeaffairs.gov.au |
 | AUS | Subclass 189 포인트 테이블 | immi.homeaffairs.gov.au |
@@ -30,14 +33,21 @@ canada.ca가 요청을 자주 차단해 불안정했다).
 | GBR | Skilled Worker 영어 능력 증명 | gov.uk |
 | GBR | Skilled Worker 비자 직무·급여 요건 | gov.uk |
 | GBR | Skilled Worker 비자 비용·자금 요건 | gov.uk |
+| GBR | Skilled Worker 비자 급여 할인(낮은 급여 허용) 기준 (신규) | gov.uk |
+| GBR | Skilled Worker 비자 동반가족(배우자·자녀) 안내 (신규) | gov.uk |
+
+신규 4건은 이전 확장 때 남아있던 갭을 메운다: 캐나다는 FSWP 최소 자격요건(NOC/TEER, 언어, 학력)과 해외 학력을
+검증하는 ECA 절차, 영국은 표준 임금 미달 시 적용되는 급여 할인 규정과 배우자·자녀 동반(`familyAccompanied` 입력값과
+직결) 안내를 추가했다. 호주는 사전 조사한 공식 문서 링크 목록(`Living_Abroad_RAG_Official_Document_Links.txt`)에
+남은 미수집 항목이 없어 이번 라운드에서는 추가하지 않았다.
 
 ## 전처리 (청킹)
 
 문단(빈 줄) 경계를 우선 존중하고, 문단이 800자를 넘으면 문장 단위로 재분할, 500자 미만의 짧은 조각은 다음 조각과
 병합하는 방식으로 500~800자 청크를 생성했다 (짧은 조각을 병합할 때 최대 800자×1.3=1040자까지 허용).
 
-- 전체 청크 수: **52개** (기존 23개에서 확장)
-- 청크 길이: 최소 150자, 최대 1029자, 평균 630자 (분포는 `01_chunk_length_distribution.png` 참고)
+- 전체 청크 수: **70개** (기존 23개 → 52개 → 70개로 확장)
+- 청크 길이: 최소 150자, 최대 1029자, 평균 637자 (분포는 `01_chunk_length_distribution.png` 참고)
 
 ## 모델링
 
@@ -71,8 +81,10 @@ canada.ca가 요청을 자주 차단해 불안정했다).
 
 ## 한계 및 다음 단계
 
-- 문서를 국가당 2~3건 → 5~6건으로 확장했지만, 여전히 특정 세부 질문(예: 호주 Subclass 189 스폰서 필요 여부처럼 이
-  비자 자체가 스폰서 불필요한 독립 비자라는 점을 명확히 언급하는 문서는 없음)에는 근거 문서가 부족할 수 있다.
+- 문서를 국가당 2~3건 → 5~6건 → CAN 8건/AUS 5건/GBR 8건으로 확장했지만, 여전히 특정 세부 질문(예: 호주
+  Subclass 189 스폰서 필요 여부처럼 이 비자 자체가 스폰서 불필요한 독립 비자라는 점을 명확히 언급하는 문서는 없음)에는
+  근거 문서가 부족할 수 있다. 호주는 사전 조사한 공식 링크 목록의 후보를 이미 모두 수집한 상태라, 추가 확장을 하려면
+  아직 목록에 없는 새 공식 문서를 조사하는 단계부터 다시 필요하다.
 - 이 컴퓨터의 Docker Desktop이 손상된 `dockerInference` 소켓 파일 때문에 기동 불가능해져, 로컬 검증은 네이티브
   PostgreSQL 16 + 직접 빌드한 pgvector 0.8.0으로 진행했다. 실제 배포는 GCP Compute Engine의 Docker Compose
   스택(공식 `pgvector/pgvector:0.8.2-pg18` 이미지 사용)에서 이뤄진다 — 로컬 DB에서 `pg_dump`로 데이터를 뽑아
