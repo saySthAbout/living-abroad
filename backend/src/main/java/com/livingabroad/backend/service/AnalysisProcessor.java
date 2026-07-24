@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -58,8 +59,21 @@ public class AnalysisProcessor {
         this.slackNotifier = slackNotifier;
     }
 
+    // @Transactional은 여기(외부에서 실제로 호출되는 진입점)에 있어야 한다. onAnalysisRequested가
+    // process(...)를 이 클래스 안에서 직접(this.process(...)) 호출하는데, Spring AOP는 프록시 기반이라
+    // 같은 빈 안에서의 self-invocation은 프록시를 거치지 않는다 — 즉 process()에만 @Transactional을
+    // 붙여두면 이 경로로 호출될 때는 트랜잭션이 전혀 시작되지 않고, 각 repository.save() 호출이
+    // 개별적으로 자동 커밋되어 버린다. 실제로 이 버그 때문에 persistResults()의 저장은 성공하지만
+    // markCompleted()가 detached 상태의 analysis 엔티티에만 반영되고 DB에는 끝내 반영되지 않아
+    // 분석 결과는 이미 나왔는데도 status가 영원히 PENDING/PROCESSING에 멈춰 있는 문제가 있었다
+    // (같은 클래스의 @Async self-invocation 문제와 동일한 원인, 다른 애노테이션에서 재발한 케이스).
+    // REQUIRES_NEW가 필요한 이유는 별개다: Spring은 @TransactionalEventListener(AFTER_COMMIT) 메서드에
+    // 기본 전파(REQUIRED)의 @Transactional을 붙이는 것 자체를 기동 시점에 막는다 — AFTER_COMMIT은
+    // 원본 트랜잭션이 이미 끝난 뒤 실행되므로 "참여할" 트랜잭션이 없기 때문에, REQUIRES_NEW(새 트랜잭션
+    // 시작) 또는 NOT_SUPPORTED(비트랜잭션)로 의도를 명시하도록 강제한다.
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onAnalysisRequested(AnalysisRequestedEvent event) {
         process(event.analysisId(), event.request());
     }
