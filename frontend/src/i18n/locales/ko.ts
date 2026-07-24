@@ -230,6 +230,16 @@ export default {
       '적합도 점수는 실제 비자 승인 확률이 아닌 Living Abroad 플랫폼 내부의 데이터 분석 결과입니다. 본 결과는 참고용이며, 정확한 법적 자문은 전문 이민 변호사와 상담하시기 바랍니다.',
     disclaimerDateSuffix: ' 정보 기준일: {date} 기준.',
   },
+  emailBanner: {
+    notVerified: '✉️ 이메일 인증이 완료되지 않았습니다.',
+    resend: '인증 메일 재전송',
+    resending: '전송 중...',
+    resendSuccess: '인증 메일을 다시 보냈습니다. 받은편지함을 확인해 주세요.',
+    resendErrorFallback: '인증 메일 재전송에 실패했습니다. 잠시 후 다시 시도해 주세요.',
+  },
+  loadingSpinner: {
+    ariaLabel: '로딩 중',
+  },
   verifyEmail: {
     checking: '이메일 인증을 확인하는 중입니다...',
     successTitle: '이메일 인증이 완료되었습니다',

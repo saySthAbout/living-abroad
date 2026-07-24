@@ -234,6 +234,16 @@ export default {
       "Fit scores are not actual visa approval probabilities -- they are data analysis results from within the Living Abroad platform. This result is for reference only; consult a qualified immigration lawyer for accurate legal advice.",
     disclaimerDateSuffix: ' Data as of: {date}.',
   },
+  emailBanner: {
+    notVerified: '✉️ Your email is not verified yet.',
+    resend: 'Resend verification email',
+    resending: 'Sending...',
+    resendSuccess: "We've sent the verification email again. Please check your inbox.",
+    resendErrorFallback: 'Failed to resend the verification email. Please try again later.',
+  },
+  loadingSpinner: {
+    ariaLabel: 'Loading',
+  },
   verifyEmail: {
     checking: 'Verifying your email...',
     successTitle: 'Email verification complete',
