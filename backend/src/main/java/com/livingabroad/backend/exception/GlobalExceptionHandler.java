@@ -57,6 +57,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_TOKEN", exception.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPasswordResetToken(InvalidPasswordResetTokenException exception, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "INVALID_PASSWORD_RESET_TOKEN", exception.getMessage(), request, List.of());
+    }
+
     @ExceptionHandler(EmailAlreadyVerifiedException.class)
     public ResponseEntity<ErrorResponse> handleEmailAlreadyVerified(EmailAlreadyVerifiedException exception, HttpServletRequest request) {
         return build(HttpStatus.CONFLICT, "EMAIL_ALREADY_VERIFIED", exception.getMessage(), request, List.of());
