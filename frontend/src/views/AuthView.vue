@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { getErrorMessage } from '@/api/client'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const activeTab = computed(() => (route.query.tab === 'signup' ? 'signup' : 'login'))
 
@@ -25,14 +27,14 @@ async function submitLogin() {
     await authStore.login(loginForm.value)
     router.push('/analysis/step-1')
   } catch (error) {
-    errorMessage.value = getErrorMessage(error, '이메일 또는 비밀번호를 확인해 주세요.')
+    errorMessage.value = getErrorMessage(error, t('auth.loginErrorFallback'))
   }
 }
 
 async function submitSignup() {
   errorMessage.value = ''
   if (signupForm.value.password !== signupForm.value.passwordConfirm) {
-    errorMessage.value = '비밀번호가 일치하지 않습니다.'
+    errorMessage.value = t('auth.passwordMismatch')
     return
   }
   try {
@@ -43,7 +45,7 @@ async function submitSignup() {
     })
     router.push('/analysis/step-1')
   } catch (error) {
-    errorMessage.value = getErrorMessage(error, '회원가입 처리 중 오류가 발생했습니다.')
+    errorMessage.value = getErrorMessage(error, t('auth.signupErrorFallback'))
   }
 }
 </script>
@@ -57,95 +59,95 @@ async function submitSignup() {
           :class="activeTab === 'login' ? 'border-b-2 border-navy-950 text-navy-950' : 'text-slate-400'"
           @click="switchTab('login')"
         >
-          로그인
+          {{ t('auth.loginTab') }}
         </button>
         <button
           class="flex-1 pb-3 text-sm font-semibold"
           :class="activeTab === 'signup' ? 'border-b-2 border-navy-950 text-navy-950' : 'text-slate-400'"
           @click="switchTab('signup')"
         >
-          회원가입
+          {{ t('auth.signupTab') }}
         </button>
       </div>
 
       <form v-if="activeTab === 'login'" class="space-y-5" @submit.prevent="submitLogin">
         <label class="block">
-          <span class="text-sm font-medium text-navy-950">이메일 주소</span>
+          <span class="text-sm font-medium text-navy-950">{{ t('auth.email') }}</span>
           <input
             v-model="loginForm.email"
             type="email"
-            placeholder="example@livingabroad.com"
+            :placeholder="t('auth.emailPlaceholder')"
             class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none"
             required
           />
         </label>
         <label class="block">
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium text-navy-950">비밀번호</span>
-            <RouterLink to="/forgot-password" class="text-xs text-navy-700 hover:underline">비밀번호 찾기</RouterLink>
+            <span class="text-sm font-medium text-navy-950">{{ t('auth.password') }}</span>
+            <RouterLink to="/forgot-password" class="text-xs text-navy-700 hover:underline">{{ t('auth.forgotPassword') }}</RouterLink>
           </div>
           <input
             v-model="loginForm.password"
             type="password"
-            placeholder="••••••••"
+            :placeholder="t('auth.passwordPlaceholder')"
             class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none"
             required
           />
         </label>
         <button type="submit" class="w-full rounded-lg bg-navy-950 py-3 text-sm font-semibold text-white hover:bg-navy-900">
-          로그인
+          {{ t('auth.loginButton') }}
         </button>
       </form>
 
       <form v-else class="space-y-5" @submit.prevent="submitSignup">
         <label class="block">
-          <span class="text-sm font-medium text-navy-950">이름</span>
+          <span class="text-sm font-medium text-navy-950">{{ t('auth.name') }}</span>
           <input
             v-model="signupForm.name"
             type="text"
-            placeholder="홍길동"
+            :placeholder="t('auth.namePlaceholder')"
             class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none"
             required
           />
         </label>
         <label class="block">
-          <span class="text-sm font-medium text-navy-950">이메일 주소</span>
+          <span class="text-sm font-medium text-navy-950">{{ t('auth.email') }}</span>
           <input
             v-model="signupForm.email"
             type="email"
-            placeholder="example@livingabroad.com"
+            :placeholder="t('auth.emailPlaceholder')"
             class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none"
             required
           />
         </label>
         <label class="block">
-          <span class="text-sm font-medium text-navy-950">비밀번호</span>
+          <span class="text-sm font-medium text-navy-950">{{ t('auth.signupPassword') }}</span>
           <input
             v-model="signupForm.password"
             type="password"
-            placeholder="8자 이상 입력"
+            :placeholder="t('auth.signupPasswordPlaceholder')"
             minlength="8"
             class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none"
             required
           />
         </label>
         <label class="block">
-          <span class="text-sm font-medium text-navy-950">비밀번호 확인</span>
+          <span class="text-sm font-medium text-navy-950">{{ t('auth.passwordConfirm') }}</span>
           <input
             v-model="signupForm.passwordConfirm"
             type="password"
-            placeholder="비밀번호 재입력"
+            :placeholder="t('auth.passwordConfirmPlaceholder')"
             class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none"
             required
           />
         </label>
         <button type="submit" class="w-full rounded-lg bg-navy-950 py-3 text-sm font-semibold text-white hover:bg-navy-900">
-          회원가입 완료
+          {{ t('auth.signupButton') }}
         </button>
       </form>
 
       <p v-if="errorMessage" class="mt-4 text-center text-sm text-red-600">{{ errorMessage }}</p>
-      <p class="mt-4 text-center text-xs text-slate-400">정확한 정보를 입력하여 안전한 이민 준비를 시작하세요.</p>
+      <p class="mt-4 text-center text-xs text-slate-400">{{ t('auth.footerNote') }}</p>
     </div>
   </section>
 </template>
