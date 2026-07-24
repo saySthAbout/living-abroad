@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -136,8 +135,12 @@ class ChatServiceTest {
 
     @Test
     void listSessionsTreatsBlankFiltersAsNoFilter() {
+        // countryCode/keyword는 null이 아니라 빈 문자열로 넘어가야 한다 — null을 바인딩하면 Hibernate가
+        // 파라미터 타입을 값에서 추론하지 못해 PostgreSQL이 bytea로 오추론하는 문제가 있었다
+        // (ChatSessionRepository 참고). 이 테스트는 Mockito만으로는 그 문제 자체를 잡아내지 못하지만,
+        // 최소한 서비스가 null을 넘기는 회귀는 막아준다.
         Page<ChatSession> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
-        when(chatSessionRepository.search(eq(100L), isNull(), isNull(), any(Pageable.class)))
+        when(chatSessionRepository.search(eq(100L), eq(""), eq(""), any(Pageable.class)))
             .thenReturn(emptyPage);
 
         chatService.listSessions(100L, "", "  ", 0, 10);
@@ -146,8 +149,8 @@ class ChatServiceTest {
         ArgumentCaptor<String> keywordCaptor = ArgumentCaptor.forClass(String.class);
         org.mockito.Mockito.verify(chatSessionRepository)
             .search(eq(100L), countryCaptor.capture(), keywordCaptor.capture(), any(Pageable.class));
-        assertThat(countryCaptor.getValue()).isNull();
-        assertThat(keywordCaptor.getValue()).isNull();
+        assertThat(countryCaptor.getValue()).isEmpty();
+        assertThat(keywordCaptor.getValue()).isEmpty();
     }
 
     private ChatSession newSession(Long sessionId, Long userId) throws Exception {
