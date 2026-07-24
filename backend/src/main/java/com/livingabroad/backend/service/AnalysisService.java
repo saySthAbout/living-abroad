@@ -1,8 +1,5 @@
 package com.livingabroad.backend.service;
 
-import com.livingabroad.backend.client.AiServerClient;
-import com.livingabroad.backend.dto.ai.AiRecommendRequestDto;
-import com.livingabroad.backend.dto.ai.AiRecommendResponseDto;
 import com.livingabroad.backend.dto.analysis.AnalysisCreateRequest;
 import com.livingabroad.backend.dto.analysis.AnalysisCreateResponse;
 import com.livingabroad.backend.dto.analysis.AnalysisDetailResponse;
@@ -12,14 +9,14 @@ import com.livingabroad.backend.entity.Analysis;
 import com.livingabroad.backend.entity.AnalysisCountryResult;
 import com.livingabroad.backend.entity.AnalysisResultReason;
 import com.livingabroad.backend.entity.VisaProgram;
+import com.livingabroad.backend.event.AnalysisRequestedEvent;
 import com.livingabroad.backend.exception.AnalysisAccessDeniedException;
 import com.livingabroad.backend.exception.AnalysisNotFoundException;
 import com.livingabroad.backend.repository.AnalysisCountryResultRepository;
 import com.livingabroad.backend.repository.AnalysisRepository;
 import com.livingabroad.backend.repository.AnalysisResultReasonRepository;
 import com.livingabroad.backend.repository.VisaProgramRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -35,8 +32,6 @@ import java.util.stream.Collectors;
 @Service
 public class AnalysisService {
 
-    private static final Logger log = LoggerFactory.getLogger(AnalysisService.class);
-    private static final List<String> SUPPORTED_COUNTRIES = List.of("CAN", "AUS", "GBR");
     private static final Map<String, String> COUNTRY_NAMES = Map.of(
         "CAN", "캐나다",
         "AUS", "호주",
@@ -48,22 +43,24 @@ public class AnalysisService {
     private final AnalysisCountryResultRepository resultRepository;
     private final AnalysisResultReasonRepository reasonRepository;
     private final VisaProgramRepository visaProgramRepository;
-    private final AiServerClient aiServerClient;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AnalysisService(
         AnalysisRepository analysisRepository,
         AnalysisCountryResultRepository resultRepository,
         AnalysisResultReasonRepository reasonRepository,
         VisaProgramRepository visaProgramRepository,
-        AiServerClient aiServerClient
+        ApplicationEventPublisher eventPublisher
     ) {
         this.analysisRepository = analysisRepository;
         this.resultRepository = resultRepository;
         this.reasonRepository = reasonRepository;
         this.visaProgramRepository = visaProgramRepository;
-        this.aiServerClient = aiServerClient;
+        this.eventPublisher = eventPublisher;
     }
 
+    // AI 호출(느릴 수 있음)은 여기서 하지 않는다. PENDING 상태로 저장만 하고 즉시 응답한 뒤,
+    // 트랜잭션이 커밋되면 AnalysisProcessor가 이벤트를 받아 백그라운드로 처리한다(AnalysisProcessor 참고).
     @Transactional
     public AnalysisCreateResponse createAnalysis(Long userId, AnalysisCreateRequest request) {
         String preferredCountryCode = "ANY".equals(request.preferredCountry()) ? null : request.preferredCountry();
@@ -84,18 +81,7 @@ public class AnalysisService {
         );
         Analysis saved = analysisRepository.save(analysis);
 
-        try {
-            AiRecommendResponseDto aiResponse = aiServerClient.recommend(new AiRecommendRequestDto(
-                saved.getAnalysisId(),
-                buildUserProfilePayload(request),
-                SUPPORTED_COUNTRIES
-            ));
-            persistResults(saved, aiResponse);
-            saved.markCompleted(aiResponse.modelVersion(), aiResponse.dataVersion());
-        } catch (RuntimeException exception) {
-            log.error("AI 분석 요청 실패 (analysisId={})", saved.getAnalysisId(), exception);
-            saved.markFailed(exception.getMessage());
-        }
+        eventPublisher.publishEvent(new AnalysisRequestedEvent(saved.getAnalysisId(), request));
 
         return new AnalysisCreateResponse(saved.getAnalysisId(), saved.getAnalysisStatus(), saved.getRequestedAt());
     }
@@ -178,34 +164,6 @@ public class AnalysisService {
             ));
     }
 
-    private void persistResults(Analysis analysis, AiRecommendResponseDto aiResponse) {
-        for (AiRecommendResponseDto.CountryResult result : aiResponse.results()) {
-            VisaProgram visaProgram = visaProgramRepository.findFirstByCountryCodeAndIsActiveTrue(result.countryCode())
-                .orElseThrow(() -> new IllegalStateException("지원하지 않는 국가입니다: " + result.countryCode()));
-
-            AnalysisCountryResult savedResult = resultRepository.save(new AnalysisCountryResult(
-                analysis.getAnalysisId(),
-                visaProgram.getVisaProgramId(),
-                (short) result.rank(),
-                result.totalScore(),
-                result.ruleScore(),
-                result.environmentScore(),
-                result.careerSimilarity(),
-                result.preferenceScore(),
-                RuleStatusMapper.toEligibilityStatus(result.ruleStatus())
-            ));
-
-            short order = 1;
-            for (String strength : result.strengths()) {
-                reasonRepository.save(new AnalysisResultReason(savedResult.getResultId(), "STRENGTH", strength, order++));
-            }
-            order = 1;
-            for (String improvement : result.improvements()) {
-                reasonRepository.save(new AnalysisResultReason(savedResult.getResultId(), "IMPROVEMENT", improvement, order++));
-            }
-        }
-    }
-
     private AnalysisDetailResponse.CountryResultDto toResultDto(AnalysisCountryResult result, List<AnalysisResultReason> reasons) {
         VisaProgram visaProgram = visaProgramRepository.findById(result.getVisaProgramId()).orElse(null);
         List<String> strengths = reasons.stream().filter(r -> "STRENGTH".equals(r.getReasonType())).map(AnalysisResultReason::getReasonContent).toList();
@@ -227,22 +185,6 @@ public class AnalysisService {
             strengths,
             improvements
         );
-    }
-
-    private Map<String, Object> buildUserProfilePayload(AnalysisCreateRequest request) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("age", request.age());
-        payload.put("education", request.education());
-        payload.put("major", request.major());
-        payload.put("occupation", request.occupation());
-        payload.put("experienceYears", request.experienceYears());
-        payload.put("languageTest", request.languageTest());
-        payload.put("languageScore", request.languageScore());
-        payload.put("careerText", request.careerText());
-        payload.put("fundsRange", request.fundsRange());
-        payload.put("familyAccompanied", request.familyAccompanied());
-        payload.put("preferredCountry", request.preferredCountry());
-        return payload;
     }
 
     private Long fundsRangeMidpoint(String fundsRange) {
