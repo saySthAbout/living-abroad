@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { getErrorMessage } from '@/api/client'
 
 const authStore = useAuthStore()
+const { t } = useI18n()
 const sending = ref(false)
 const feedback = ref('')
 const feedbackIsError = ref(false)
@@ -14,10 +16,10 @@ async function resend() {
   try {
     await authStore.resendVerificationEmail()
     feedbackIsError.value = false
-    feedback.value = '인증 메일을 다시 보냈습니다. 받은편지함을 확인해 주세요.'
+    feedback.value = t('emailBanner.resendSuccess')
   } catch (error) {
     feedbackIsError.value = true
-    feedback.value = getErrorMessage(error, '인증 메일 재전송에 실패했습니다. 잠시 후 다시 시도해 주세요.')
+    feedback.value = getErrorMessage(error, t('emailBanner.resendErrorFallback'))
   } finally {
     sending.value = false
   }
@@ -28,7 +30,7 @@ async function resend() {
   <div v-if="authStore.token && authStore.user && !authStore.user.emailVerified" class="border-b border-gold-600/30 bg-soft-100">
     <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-6 py-2.5 text-sm">
       <p class="text-navy-950">
-        ✉️ 이메일 인증이 완료되지 않았습니다.
+        {{ t('emailBanner.notVerified') }}
         <span v-if="feedback" :class="feedbackIsError ? 'text-red-600' : 'text-navy-700'">{{ feedback }}</span>
       </p>
       <button
@@ -36,7 +38,7 @@ async function resend() {
         :disabled="sending"
         @click="resend"
       >
-        {{ sending ? '전송 중...' : '인증 메일 재전송' }}
+        {{ sending ? t('emailBanner.resending') : t('emailBanner.resend') }}
       </button>
     </div>
   </div>
