@@ -104,6 +104,10 @@ public class Analysis {
         this.inputCareerDescription = inputCareerDescription;
     }
 
+    public void markProcessing() {
+        this.analysisStatus = "PROCESSING";
+    }
+
     public void markCompleted(String modelVersion, String dataVersion) {
         this.analysisStatus = "COMPLETED";
         this.modelVersion = modelVersion;

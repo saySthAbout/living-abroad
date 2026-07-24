@@ -9,6 +9,13 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  task:
+    execution:
+      pool:
+        core-size: ${ASYNC_POOL_CORE_SIZE:4}
+        max-size: ${ASYNC_POOL_MAX_SIZE:8}
+        queue-capacity: ${ASYNC_POOL_QUEUE_CAPACITY:50}
+      thread-name-prefix: async-
   flyway:
     enabled: true
     locations: filesystem:../data/database
