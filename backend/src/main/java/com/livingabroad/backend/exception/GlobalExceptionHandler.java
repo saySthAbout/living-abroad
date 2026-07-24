@@ -77,6 +77,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.FORBIDDEN, "ANALYSIS_ACCESS_DENIED", exception.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(AnalysisNotCompletedException.class)
+    public ResponseEntity<ErrorResponse> handleAnalysisNotCompleted(AnalysisNotCompletedException exception, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "ANALYSIS_NOT_COMPLETED", exception.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(InvalidShareTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidShareToken(InvalidShareTokenException exception, HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, "INVALID_SHARE_TOKEN", exception.getMessage(), request, List.of());
+    }
+
     @ExceptionHandler(ChatSessionNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleChatSessionNotFound(ChatSessionNotFoundException exception, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, "CHAT_SESSION_NOT_FOUND", exception.getMessage(), request, List.of());

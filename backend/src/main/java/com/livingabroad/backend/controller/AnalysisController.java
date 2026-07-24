@@ -5,12 +5,14 @@ import com.livingabroad.backend.dto.analysis.AnalysisCreateResponse;
 import com.livingabroad.backend.dto.analysis.AnalysisDetailResponse;
 import com.livingabroad.backend.dto.analysis.AnalysisHistoryPageResponse;
 import com.livingabroad.backend.dto.analysis.AnalysisInputResponse;
+import com.livingabroad.backend.dto.analysis.ShareLinkResponse;
 import com.livingabroad.backend.service.AnalysisService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,5 +57,17 @@ public class AnalysisController {
         @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(analysisService.listAnalyses(Long.valueOf(jwt.getSubject()), page, size));
+    }
+
+    @PostMapping("/{analysisId}/share")
+    public ResponseEntity<ShareLinkResponse> createShareLink(@AuthenticationPrincipal Jwt jwt, @PathVariable Long analysisId) {
+        String shareToken = analysisService.getOrCreateShareToken(Long.valueOf(jwt.getSubject()), analysisId);
+        return ResponseEntity.ok(new ShareLinkResponse(shareToken));
+    }
+
+    @DeleteMapping("/{analysisId}/share")
+    public ResponseEntity<Void> revokeShareLink(@AuthenticationPrincipal Jwt jwt, @PathVariable Long analysisId) {
+        analysisService.revokeShareToken(Long.valueOf(jwt.getSubject()), analysisId);
+        return ResponseEntity.noContent().build();
     }
 }

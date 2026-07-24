@@ -59,6 +59,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/shared/:token',
+      name: 'SHARED_RESULT',
+      component: () => import('@/views/SharedResultView.vue'),
+      meta: { requiresAuth: false },
+    },
+    {
       path: '/chat',
       name: 'CHAT',
       component: () => import('@/views/AiChatView.vue'),

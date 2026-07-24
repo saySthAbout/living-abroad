@@ -66,6 +66,20 @@ export const useAnalysisStore = defineStore('analysis', () => {
     return data
   }
 
+  async function createShareLink(id: number) {
+    const { data } = await apiClient.post(`/api/analyses/${id}/share`, {})
+    return data.shareToken as string
+  }
+
+  async function revokeShareLink(id: number) {
+    await apiClient.delete(`/api/analyses/${id}/share`)
+  }
+
+  async function loadSharedResult(shareToken: string) {
+    const { data } = await apiClient.get(`/api/public/analyses/shared/${shareToken}`)
+    return data
+  }
+
   function resetAnalysis() {
     step1Data.value = emptyStep1()
     step2Data.value = emptyStep2()
@@ -82,6 +96,9 @@ export const useAnalysisStore = defineStore('analysis', () => {
     saveStep2,
     submitAnalysis,
     loadResult,
+    createShareLink,
+    revokeShareLink,
+    loadSharedResult,
     resetAnalysis,
   }
 })
