@@ -2,6 +2,7 @@ package com.livingabroad.backend.controller;
 
 import com.livingabroad.backend.dto.chat.ChatAnswerResponse;
 import com.livingabroad.backend.dto.chat.ChatQuestionRequest;
+import com.livingabroad.backend.dto.chat.ChatSessionHistoryPageResponse;
 import com.livingabroad.backend.dto.chat.ChatSessionResponse;
 import com.livingabroad.backend.service.ChatService;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -36,5 +38,16 @@ public class ChatController {
     @GetMapping("/sessions/{sessionId}")
     public ResponseEntity<ChatSessionResponse> getSession(@AuthenticationPrincipal Jwt jwt, @PathVariable Long sessionId) {
         return ResponseEntity.ok(chatService.getSessionHistory(Long.valueOf(jwt.getSubject()), sessionId));
+    }
+
+    @GetMapping("/sessions")
+    public ResponseEntity<ChatSessionHistoryPageResponse> listSessions(
+        @AuthenticationPrincipal Jwt jwt,
+        @RequestParam(required = false) String countryCode,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(chatService.listSessions(Long.valueOf(jwt.getSubject()), countryCode, keyword, page, size));
     }
 }
