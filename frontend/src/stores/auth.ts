@@ -45,6 +45,12 @@ export const useAuthStore = defineStore('auth', () => {
     return data
   }
 
+  async function loginWithGoogle(idToken: string) {
+    const { data } = await apiClient.post('/api/auth/google', { idToken })
+    setSession(data.accessToken, data.refreshToken, data.user)
+    return data
+  }
+
   async function loadUser() {
     if (!token.value) return
     const { data } = await apiClient.get('/api/users/me')
@@ -92,6 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     login,
     signup,
+    loginWithGoogle,
     loadUser,
     refresh,
     resendVerificationEmail,

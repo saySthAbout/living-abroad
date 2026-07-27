@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -9,6 +9,9 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const { t } = useI18n()
+
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+const googleButtonEl = ref<HTMLElement | null>(null)
 
 const activeTab = computed(() => (route.query.tab === 'signup' ? 'signup' : 'login'))
 
@@ -48,6 +51,60 @@ async function submitSignup() {
     errorMessage.value = getErrorMessage(error, t('auth.signupErrorFallback'))
   }
 }
+
+async function handleGoogleCredential(response: { credential: string }) {
+  errorMessage.value = ''
+  try {
+    await authStore.loginWithGoogle(response.credential)
+    router.push('/analysis/step-1')
+  } catch (error) {
+    errorMessage.value = getErrorMessage(error, t('auth.googleErrorFallback'))
+  }
+}
+
+function loadGoogleIdentityScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.google?.accounts?.id) {
+      resolve()
+      return
+    }
+    const existing = document.getElementById('google-identity-script')
+    if (existing) {
+      existing.addEventListener('load', () => resolve())
+      existing.addEventListener('error', () => reject(new Error('google identity script failed')))
+      return
+    }
+    const script = document.createElement('script')
+    script.id = 'google-identity-script'
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error('google identity script failed'))
+    document.head.appendChild(script)
+  })
+}
+
+// Google 로그인 버튼은 GOOGLE_CLIENT_ID가 설정된 경우에만 렌더링한다 — 비어있으면 조용히 숨긴다.
+onMounted(async () => {
+  if (!googleClientId) return
+  try {
+    await loadGoogleIdentityScript()
+    if (!window.google || !googleButtonEl.value) return
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: handleGoogleCredential,
+    })
+    window.google.accounts.id.renderButton(googleButtonEl.value, {
+      theme: 'outline',
+      size: 'large',
+      width: 360,
+      text: 'continue_with',
+    })
+  } catch {
+    // 스크립트 로드 실패 시 버튼만 안 뜨고 나머지 이메일 로그인/회원가입은 그대로 동작한다.
+  }
+})
 </script>
 
 <template>
@@ -145,6 +202,15 @@ async function submitSignup() {
           {{ t('auth.signupButton') }}
         </button>
       </form>
+
+      <div v-if="googleClientId" class="mt-6">
+        <div class="mb-4 flex items-center gap-3">
+          <div class="h-px flex-1 bg-slate-200"></div>
+          <span class="text-xs text-slate-400">{{ t('auth.orDivider') }}</span>
+          <div class="h-px flex-1 bg-slate-200"></div>
+        </div>
+        <div ref="googleButtonEl" class="flex justify-center"></div>
+      </div>
 
       <p v-if="errorMessage" class="mt-4 text-center text-sm text-red-600">{{ errorMessage }}</p>
       <p class="mt-4 text-center text-xs text-slate-400">{{ t('auth.footerNote') }}</p>

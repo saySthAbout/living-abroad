@@ -65,6 +65,8 @@ export default {
     passwordMismatch: '비밀번호가 일치하지 않습니다.',
     loginErrorFallback: '이메일 또는 비밀번호를 확인해 주세요.',
     signupErrorFallback: '회원가입 처리 중 오류가 발생했습니다.',
+    orDivider: '또는',
+    googleErrorFallback: 'Google 로그인 중 오류가 발생했습니다.',
   },
   step1: {
     stepLabel1: '기본 자격 정보',

@@ -65,6 +65,8 @@ export default {
     passwordMismatch: 'Passwords do not match.',
     loginErrorFallback: 'Please check your email or password.',
     signupErrorFallback: 'An error occurred while signing up.',
+    orDivider: 'or',
+    googleErrorFallback: 'An error occurred during Google sign-in.',
   },
   step1: {
     stepLabel1: 'Basic eligibility info',
