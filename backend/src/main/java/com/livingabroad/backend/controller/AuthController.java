@@ -2,6 +2,7 @@ package com.livingabroad.backend.controller;
 
 import com.livingabroad.backend.dto.auth.AuthResponse;
 import com.livingabroad.backend.dto.auth.ForgotPasswordRequest;
+import com.livingabroad.backend.dto.auth.GoogleLoginRequest;
 import com.livingabroad.backend.dto.auth.LoginRequest;
 import com.livingabroad.backend.dto.auth.RefreshRequest;
 import com.livingabroad.backend.dto.auth.ResetPasswordRequest;
@@ -44,6 +45,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> loginWithGoogle(@Valid @RequestBody GoogleLoginRequest request) {
+        return ResponseEntity.ok(authService.loginWithGoogle(request.idToken()));
     }
 
     @PostMapping("/refresh")

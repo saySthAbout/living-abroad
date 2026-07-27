@@ -30,19 +30,22 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailVerificationService emailVerificationService;
+    private final GoogleAuthService googleAuthService;
 
     public AuthService(
         UserRepository userRepository,
         RefreshTokenRepository refreshTokenRepository,
         PasswordEncoder passwordEncoder,
         JwtService jwtService,
-        EmailVerificationService emailVerificationService
+        EmailVerificationService emailVerificationService,
+        GoogleAuthService googleAuthService
     ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailVerificationService = emailVerificationService;
+        this.googleAuthService = googleAuthService;
     }
 
     @Transactional
@@ -91,6 +94,26 @@ public class AuthService {
             .orElseThrow(InvalidRefreshTokenException::new);
 
         return buildResponse(user);
+    }
+
+    @Transactional
+    public AuthResponse loginWithGoogle(String idToken) {
+        GoogleAuthService.GoogleIdentity identity = googleAuthService.verify(idToken);
+
+        User user = userRepository.findByGoogleSub(identity.sub())
+            .or(() -> userRepository.findByEmail(identity.email()).map(existing -> linkIfNeeded(existing, identity)))
+            .orElseGet(() -> userRepository.save(User.forGoogleSignup(identity.email(), identity.name(), identity.sub())));
+
+        return buildResponse(user);
+    }
+
+    // 이미 이메일/비밀번호로 가입된 계정에 Google 로그인을 처음 시도한 경우 — Google이 같은 이메일을
+    // 검증했으므로 두 로그인 수단을 병합한다(비밀번호 로그인도 계속 가능하게 authProvider는 바꾸지 않음).
+    private User linkIfNeeded(User user, GoogleAuthService.GoogleIdentity identity) {
+        if (!identity.sub().equals(user.getGoogleSub())) {
+            user.linkGoogleAccount(identity.sub());
+        }
+        return user;
     }
 
     @Transactional

@@ -52,6 +52,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", exception.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(InvalidGoogleTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidGoogleToken(InvalidGoogleTokenException exception, HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, "INVALID_GOOGLE_TOKEN", exception.getMessage(), request, List.of());
+    }
+
     @ExceptionHandler(InvalidVerificationTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidVerificationToken(InvalidVerificationTokenException exception, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "INVALID_VERIFICATION_TOKEN", exception.getMessage(), request, List.of());

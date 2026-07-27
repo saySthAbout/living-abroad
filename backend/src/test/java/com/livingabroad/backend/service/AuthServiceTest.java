@@ -7,6 +7,7 @@ import com.livingabroad.backend.entity.RefreshToken;
 import com.livingabroad.backend.entity.User;
 import com.livingabroad.backend.exception.EmailAlreadyExistsException;
 import com.livingabroad.backend.exception.InvalidCredentialsException;
+import com.livingabroad.backend.exception.InvalidGoogleTokenException;
 import com.livingabroad.backend.exception.InvalidRefreshTokenException;
 import com.livingabroad.backend.repository.RefreshTokenRepository;
 import com.livingabroad.backend.repository.UserRepository;
@@ -47,6 +48,9 @@ class AuthServiceTest {
 
     @Mock
     private EmailVerificationService emailVerificationService;
+
+    @Mock
+    private GoogleAuthService googleAuthService;
 
     @InjectMocks
     private AuthService authService;
@@ -144,6 +148,62 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.login(request))
             .isInstanceOf(InvalidCredentialsException.class);
+    }
+
+    @Test
+    void loginWithGoogleCreatesNewUserWhenNoneExists() {
+        stubTokenIssuance();
+        GoogleAuthService.GoogleIdentity identity =
+            new GoogleAuthService.GoogleIdentity("google-sub-1", "newgoogle@example.com", "New Google User");
+        when(googleAuthService.verify("id-token")).thenReturn(identity);
+        when(userRepository.findByGoogleSub("google-sub-1")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("newgoogle@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AuthResponse response = authService.loginWithGoogle("id-token");
+
+        assertThat(response.accessToken()).isEqualTo("token-value");
+        assertThat(response.user().email()).isEqualTo("newgoogle@example.com");
+        assertThat(response.user().name()).isEqualTo("New Google User");
+    }
+
+    @Test
+    void loginWithGoogleReturnsExistingUserMatchedByGoogleSub() {
+        stubTokenIssuance();
+        User existing = User.forGoogleSignup("existing@example.com", "Existing User", "google-sub-2");
+        GoogleAuthService.GoogleIdentity identity =
+            new GoogleAuthService.GoogleIdentity("google-sub-2", "existing@example.com", "Existing User");
+        when(googleAuthService.verify("id-token")).thenReturn(identity);
+        when(userRepository.findByGoogleSub("google-sub-2")).thenReturn(Optional.of(existing));
+
+        AuthResponse response = authService.loginWithGoogle("id-token");
+
+        assertThat(response.user().email()).isEqualTo("existing@example.com");
+    }
+
+    @Test
+    void loginWithGoogleLinksExistingLocalAccountMatchedByEmail() {
+        stubTokenIssuance();
+        User localUser = new User("shared@example.com", "hashed", "Local User");
+        GoogleAuthService.GoogleIdentity identity =
+            new GoogleAuthService.GoogleIdentity("google-sub-3", "shared@example.com", "Local User");
+        when(googleAuthService.verify("id-token")).thenReturn(identity);
+        when(userRepository.findByGoogleSub("google-sub-3")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("shared@example.com")).thenReturn(Optional.of(localUser));
+
+        authService.loginWithGoogle("id-token");
+
+        assertThat(localUser.getGoogleSub()).isEqualTo("google-sub-3");
+        assertThat(localUser.isEmailVerified()).isTrue();
+        assertThat(localUser.getAuthProvider()).isEqualTo("LOCAL");
+    }
+
+    @Test
+    void loginWithGooglePropagatesInvalidTokenException() {
+        when(googleAuthService.verify("bad-token")).thenThrow(new InvalidGoogleTokenException());
+
+        assertThatThrownBy(() -> authService.loginWithGoogle("bad-token"))
+            .isInstanceOf(InvalidGoogleTokenException.class);
     }
 
     @Test

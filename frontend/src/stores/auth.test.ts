@@ -48,6 +48,20 @@ describe('useAuthStore', () => {
     expect(store.user).toEqual(user)
   })
 
+  it('loginWithGoogle stores the session using the id token', async () => {
+    const user = { id: 3, name: '박구글', email: 'google@example.com', emailVerified: true }
+    vi.mocked(apiClient.post).mockResolvedValueOnce({
+      data: { accessToken: 'access-3', refreshToken: 'refresh-3', user },
+    })
+
+    const store = useAuthStore()
+    await store.loginWithGoogle('google-id-token')
+
+    expect(apiClient.post).toHaveBeenCalledWith('/api/auth/google', { idToken: 'google-id-token' })
+    expect(store.token).toBe('access-3')
+    expect(store.user).toEqual(user)
+  })
+
   it('loadUser does nothing when there is no token', async () => {
     const store = useAuthStore()
     await store.loadUser()
