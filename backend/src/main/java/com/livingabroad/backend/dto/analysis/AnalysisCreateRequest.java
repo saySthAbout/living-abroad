@@ -1,5 +1,6 @@
 package com.livingabroad.backend.dto.analysis;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -26,6 +27,7 @@ public record AnalysisCreateRequest(
 
     String languageTest,
 
+    @DecimalMin("0")
     BigDecimal languageScore,
 
     @NotBlank
