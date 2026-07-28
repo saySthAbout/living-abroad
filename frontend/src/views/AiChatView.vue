@@ -54,7 +54,11 @@ const historyItems = ref<ChatSessionSummary[]>([])
 const historyLoading = ref(false)
 const historyError = ref('')
 
-const starterChips = computed(() => [t('chat.starter1'), t('chat.starter2'), t('chat.starter3')])
+const starterChipKeys: Record<'CAN' | 'AUS' | 'GBR', string> = { CAN: 'Can', AUS: 'Aus', GBR: 'Gbr' }
+const starterChips = computed(() => {
+  const key = starterChipKeys[countryCode.value]
+  return [t(`chat.starter${key}1`), t(`chat.starter${key}2`), t(`chat.starter${key}3`)]
+})
 const followUpChips = computed(() => [t('chat.followUp1'), t('chat.followUp2'), t('chat.followUp3'), t('chat.followUp4')])
 
 async function scrollToBottom() {
