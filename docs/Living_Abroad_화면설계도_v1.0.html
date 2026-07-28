@@ -1,0 +1,623 @@
+<meta charset="UTF-8" />
+<title>Living Abroad — 화면설계서</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page-bg: #ffffff;
+    --panel-bg: #fafbfd;
+    --header-cell: #eef1f8;
+    --ink: #1f2937;
+    --muted: #64748b;
+    --line: #d7dee8;
+    --navy: #0b1c3a;
+    --navy-2: #10254a;
+    --gold: #f0bc32;
+    --gold-2: #d9a520;
+    --soft: #f5f7fb;
+    --soft-2: #eef1f8;
+    --a-badge: #e8a23a;
+    --v-badge: #4f8ff0;
+    --shadow: rgba(15, 23, 42, 0.10);
+  }
+  /* 항상 라이트 테마로 고정 — 뷰어의 다크모드 설정/토글과 무관하게 동일하게 보인다. */
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--soft);
+    color: var(--ink);
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  .toc {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    overflow-x: auto;
+    background: color-mix(in srgb, var(--page-bg) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  .toc a {
+    flex: none;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .toc a:hover, .toc a:focus-visible { color: var(--ink); border-color: var(--gold-2); outline: none; }
+
+  .cover {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 90px 24px 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover .kicker { color: var(--gold-2); font-size: 13px; font-weight: 800; letter-spacing: 0.08em; }
+  .cover h1 { font-size: clamp(28px, 4.5vw, 44px); margin: 10px 0 12px; color: var(--ink); text-wrap: balance; }
+  .cover p.lede { color: var(--muted); max-width: 620px; font-size: 14.5px; line-height: 1.7; margin: 0 0 36px; }
+  .cover table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cover th, .cover td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; }
+  .cover th { background: var(--header-cell); color: var(--muted); font-weight: 700; width: 120px; }
+  .cover td a { color: var(--ink); font-weight: 700; text-decoration: none; }
+  .cover td a:hover { color: var(--gold-2); }
+
+  /* ---------- doc page (screen spec sheet) ---------- */
+  .doc-page {
+    scroll-margin-top: 52px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 26px 24px 50px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .meta-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 14px;
+    background: var(--page-bg);
+  }
+  .meta-table th, .meta-table td {
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+    text-align: left;
+  }
+  .meta-table th {
+    background: var(--header-cell);
+    color: var(--ink);
+    font-weight: 700;
+    width: 13%;
+  }
+  .meta-table td { width: 37%; color: var(--ink); }
+  .meta-table td.id { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink); font-weight: 700; }
+
+  .doc-body { display: flex; gap: 18px; flex: 1; align-items: flex-start; }
+  .mockup-wrap {
+    flex: 1;
+    min-width: 0;
+    background: var(--page-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 26px;
+    box-shadow: 0 8px 22px -16px var(--shadow);
+  }
+  .desc-panel {
+    width: 280px;
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--panel-bg);
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+  }
+  .desc-head {
+    background: var(--navy);
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    padding: 10px 14px;
+  }
+  .desc-section-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    padding: 10px 14px 4px;
+  }
+  .checkpoint {
+    margin: 0 14px 10px;
+    padding: 10px 12px;
+    background: var(--soft-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .av-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .desc-panel .av-group:first-of-type .av-row:first-child { border-top: 1px solid var(--line); }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 800;
+    color: #1a1305;
+    margin-top: 1px;
+  }
+  .tag.a { background: var(--a-badge); color: #2a1a02; }
+  .tag.v { background: var(--v-badge); color: #fff; }
+
+  /* ---------- realistic mini mockup primitives ---------- */
+  .mk-window { background: var(--soft); border-radius: 8px; padding: 16px; }
+  .mk-topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 4px 16px; }
+  .mk-logo { font-weight: 800; color: var(--navy); font-size: 14px; }
+  .mk-nav { display: flex; gap: 16px; font-size: 11.5px; color: var(--muted); }
+  .mk-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 1px solid var(--line); color: var(--navy); background: #fff; white-space: nowrap; }
+  .mk-btn.primary { background: var(--gold); border-color: var(--gold); color: #241a00; }
+  .mk-btn.dark { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .mk-card { background: #fff; border: 1px solid var(--line); border-radius: 10px; }
+  .mk-field { display: flex; flex-direction: column; gap: 4px; }
+  .mk-field label { font-size: 11.5px; color: var(--ink); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .mk-field .input { border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; font-size: 12px; color: var(--muted); background: #fff; }
+  .mk-h1 { font-size: 17px; font-weight: 800; color: var(--navy); }
+  .mk-sub { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .mk-row { display: flex; gap: 14px; }
+  .mk-row.between { justify-content: space-between; align-items: center; }
+  .mk-col { display: flex; flex-direction: column; gap: 10px; }
+  .mk-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .mk-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .mk-grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .mk-chip { font-size: 10.5px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; }
+  .mk-bubble { max-width: 74%; padding: 9px 12px; border-radius: 10px; font-size: 11.5px; border: 1px solid var(--line); background: var(--soft); }
+  .mk-bubble.user { align-self: flex-end; background: var(--navy); color: #fff; border-color: var(--navy); }
+  .mk-country { border-radius: 8px; height: 44px; display: flex; align-items: flex-end; padding: 6px 8px; font-size: 10.5px; color: #fff; font-weight: 700; }
+  .mk-bar { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+  .mk-bar > span { display: block; height: 100%; background: var(--gold-2); }
+  .mk-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .mk-table th, .mk-table td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+  .mk-table th { color: var(--muted); background: var(--soft); font-weight: 700; }
+  .mk-check { width: 12px; height: 12px; border: 1.5px solid var(--line); border-radius: 3px; flex: none; }
+
+  .page-foot { align-self: flex-end; margin-top: 16px; font-size: 12px; color: var(--muted); font-weight: 600; }
+
+  @media (max-width: 860px) {
+    .doc-body { flex-direction: column; }
+    .desc-panel { width: 100%; }
+    .mk-grid2, .mk-grid3, .mk-grid4 { grid-template-columns: 1fr; }
+  }
+</style>
+
+<nav class="toc">
+  <a href="#cover">TOC</a>
+  <a href="#home">HOME-001</a>
+  <a href="#auth">AUTH-001</a>
+  <a href="#signup">AUTH-002</a>
+  <a href="#ana1">ANA-001</a>
+  <a href="#ana2">ANA-002</a>
+  <a href="#ana3">ANA-003</a>
+  <a href="#res">RES-001</a>
+  <a href="#chat">CHAT-001</a>
+  <a href="#my">MY-001</a>
+</nav>
+
+<section class="cover" id="cover">
+  <div class="kicker">LIVING ABROAD · 화면설계서 · 2026-07-28</div>
+  <h1>화면설계서</h1>
+  <p class="lede">화면명 · 화면 ID · 위치 · 파일명 메타정보와, 화면 목업 위 Action(A)·Validation(V) 번호, 우측 Description(Check Point / A / V 설명)으로 구성된 표준 화면설계 포맷입니다.</p>
+  <table>
+    <tr><th>#</th><th>화면 ID</th><th>화면명</th><th>위치</th></tr>
+    <tr><td>1</td><td><a href="#home">HOME-001</a></td><td>홈</td><td>/</td></tr>
+    <tr><td>2</td><td><a href="#auth">AUTH-001</a></td><td>로그인</td><td>/auth?tab=login</td></tr>
+    <tr><td>3</td><td><a href="#signup">AUTH-002</a></td><td>회원가입</td><td>/auth?tab=signup</td></tr>
+    <tr><td>4</td><td><a href="#ana1">ANA-001</a></td><td>AI 분석 1단계</td><td>/analysis/step-1</td></tr>
+    <tr><td>5</td><td><a href="#ana2">ANA-002</a></td><td>AI 분석 2단계</td><td>/analysis/step-2</td></tr>
+    <tr><td>6</td><td><a href="#ana3">ANA-003</a></td><td>AI 분석 로딩</td><td>/analysis/loading</td></tr>
+    <tr><td>7</td><td><a href="#res">RES-001</a></td><td>추천 결과</td><td>/results/{id}</td></tr>
+    <tr><td>8</td><td><a href="#chat">CHAT-001</a></td><td>AI 상담</td><td>/chat</td></tr>
+    <tr><td>9</td><td><a href="#my">MY-001</a></td><td>내 결과</td><td>/my-results</td></tr>
+  </table>
+</section>
+
+<!-- 01 HOME -->
+<section class="doc-page" id="home">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>홈</td><th>화면 ID</th><td class="id">HOME-001</td></tr>
+    <tr><th>위 치</th><td>/</td><th>파일명</th><td>HomeView.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap"><div class="mk-window mk-col">
+      <div class="mk-topbar">
+        <div class="mk-logo">🏠 Living Abroad</div>
+        <div class="mk-nav"><span>홈</span><span>AI 분석</span><span>AI 상담</span><span>내 결과</span></div>
+        <div class="mk-row"><span class="mk-btn">로그인</span><span class="mk-btn dark">회원가입</span></div>
+      </div>
+      <div class="mk-card mk-col" style="padding:28px; align-items:center; text-align:center;">
+        <div class="mk-h1" style="font-size:20px;">AI로 찾는 나에게 맞는<br />해외 취업·이주 경로</div>
+        <p class="mk-sub" style="max-width:480px;">복잡한 이민 정책과 비자 조건을 일일이 확인하지 마세요. AI가 경력과 학력을 분석해 캐나다·호주·영국 중 가장 적합한 경로를 제안합니다.</p>
+        <div class="mk-row">
+          <span class="mk-btn primary"><span class="tag a">A1</span>무료 AI 분석 시작하기</span>
+          <span class="mk-btn dark"><span class="tag a">A2</span>AI 상담 시작하기</span>
+        </div>
+      </div>
+      <div class="mk-grid3">
+        <div class="mk-card" style="padding:14px;"><div style="font-size:18px;">🛡️</div><div style="font-weight:700; font-size:12.5px; margin-top:4px;">국가·비자 적합도 분석</div></div>
+        <div class="mk-card" style="padding:14px;"><div style="font-size:18px;">💼</div><div style="font-weight:700; font-size:12.5px; margin-top:4px;">경력·해외 직업군 AI 매칭</div></div>
+        <div class="mk-card" style="padding:14px;"><div style="font-size:18px;">💬</div><div style="font-weight:700; font-size:12.5px; margin-top:4px;">공식 정책 기반 AI 상담</div></div>
+      </div>
+      <div class="mk-card" style="padding:16px;">
+        <div style="font-weight:700; font-size:13px; margin-bottom:10px;">지원을 시작할 수 있는 국가</div>
+        <div class="mk-grid3">
+          <div class="mk-col" style="gap:6px;"><div class="mk-country" style="background:#c0392b;">🇨🇦 Canada</div><div class="mk-row between"><span style="font-size:11px; font-weight:700;">캐나다</span><span class="mk-chip"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A3</span>분석하기</span></div></div>
+          <div class="mk-col" style="gap:6px;"><div class="mk-country" style="background:#1f6fb2;">🇦🇺 Australia</div><div class="mk-row between"><span style="font-size:11px; font-weight:700;">호주</span><span class="mk-chip">분석하기</span></div></div>
+          <div class="mk-col" style="gap:6px;"><div class="mk-country" style="background:#2c3e6b;">🇬🇧 UK</div><div class="mk-row between"><span style="font-size:11px; font-weight:700;">영국</span><span class="mk-chip">분석하기</span></div></div>
+        </div>
+      </div>
+    </div></div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">비로그인 사용자도 접근 가능한 공개 화면. CTA 클릭 시 로그인 여부에 따라 이동 경로가 분기됩니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>"무료 AI 분석 시작하기" 클릭 → 로그인 시 <b>/analysis/step-1</b>, 비로그인 시 <b>/auth?tab=login</b></span></div>
+        <div class="av-row"><span class="tag a">A2</span><span>"AI 상담 시작하기" 클릭 → <b>/chat</b> 이동(비로그인 시 로그인 유도)</span></div>
+        <div class="av-row"><span class="tag a">A3</span><span>국가 카드 "분석하기" 클릭 → 해당 국가를 우선 선택한 채 분석 플로우 진입</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">1/9페이지</div>
+</section>
+
+<!-- 02 AUTH: LOGIN -->
+<section class="doc-page" id="auth">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>로그인</td><th>화면 ID</th><td class="id">AUTH-001</td></tr>
+    <tr><th>위 치</th><td>/auth?tab=login</td><th>파일명</th><td>AuthView.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap" style="display:flex; justify-content:center;">
+      <div class="mk-card" style="width:360px; padding:26px;">
+        <div class="mk-row" style="border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:16px;">
+          <span style="font-weight:800; font-size:14px; color:var(--navy); border-bottom:2px solid var(--navy); padding-bottom:8px;"><span class="tag a">A1</span>로그인</span>
+          <span style="font-weight:600; font-size:13px; color:var(--muted); margin-left:16px;"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A2</span>회원가입</span>
+        </div>
+        <div class="mk-col">
+          <div class="mk-field"><label><span class="tag v">V1</span>이메일 주소</label><div class="input">you@example.com</div></div>
+          <div class="mk-row between"><label style="font-size:11.5px; font-weight:600;"><span class="tag v">V2</span>비밀번호</label><span style="font-size:11px; color:var(--navy);">비밀번호 찾기</span></div>
+          <div class="input">••••••••</div>
+          <span class="mk-btn dark" style="justify-content:center;"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A3</span>로그인</span>
+          <div style="text-align:center; font-size:11px; color:var(--muted);">— 또는 —</div>
+          <span class="mk-btn" style="justify-content:center;">G  Continue with Google</span>
+        </div>
+      </div>
+    </div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">JWT 기반 인증 — 로그인 성공 시 Access/Refresh 토큰 발급. Google 로그인 버튼은 Client ID 설정 시에만 노출됩니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>로그인 탭 클릭(현재 화면)</span></div>
+        <div class="av-row"><span class="tag a">A2</span><span>회원가입 탭 클릭 → <b>AUTH-002 회원가입</b>(<b>/auth?tab=signup</b>)으로 전환</span></div>
+        <div class="av-row"><span class="tag a">A3</span><span>"로그인" 버튼 클릭 → 인증 성공 시 <b>/analysis/step-1</b> 이동</span></div>
+      </div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag v">V1</span><span>이메일 형식 검증(type=email), 미입력 시 제출 불가</span></div>
+        <div class="av-row"><span class="tag v">V2</span><span>비밀번호 필수 입력</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">2/9페이지</div>
+</section>
+
+<!-- 03 AUTH: SIGNUP -->
+<section class="doc-page" id="signup">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>회원가입</td><th>화면 ID</th><td class="id">AUTH-002</td></tr>
+    <tr><th>위 치</th><td>/auth?tab=signup</td><th>파일명</th><td>AuthView.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap" style="display:flex; justify-content:center;">
+      <div class="mk-card" style="width:360px; padding:26px;">
+        <div class="mk-row" style="border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:16px;">
+          <span style="font-weight:600; font-size:13px; color:var(--muted);"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A1</span>로그인</span>
+          <span style="font-weight:800; font-size:14px; color:var(--navy); border-bottom:2px solid var(--navy); padding-bottom:8px; margin-left:16px;"><span class="tag a">A2</span>회원가입</span>
+        </div>
+        <div class="mk-col">
+          <div class="mk-field"><label><span class="tag v">V1</span>이름</label><div class="input">홍길동</div></div>
+          <div class="mk-field"><label><span class="tag v">V2</span>이메일 주소</label><div class="input">you@example.com</div></div>
+          <div class="mk-field"><label><span class="tag v">V3</span>비밀번호</label><div class="input">8자 이상 입력</div></div>
+          <div class="mk-field"><label><span class="tag v">V4</span>비밀번호 확인</label><div class="input">비밀번호 재입력</div></div>
+          <span class="mk-btn dark" style="justify-content:center;"><span class="tag a">A3</span>회원가입 완료</span>
+        </div>
+      </div>
+    </div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">비밀번호와 비밀번호 확인이 다르면 서버 요청 없이 클라이언트 단에서 즉시 오류 메시지를 표시하고 제출을 막습니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>로그인 탭 클릭 → <b>AUTH-001 로그인</b>(<b>/auth?tab=login</b>)으로 전환</span></div>
+        <div class="av-row"><span class="tag a">A2</span><span>회원가입 탭 클릭(현재 화면)</span></div>
+        <div class="av-row"><span class="tag a">A3</span><span>"회원가입 완료" 클릭 → 계정 생성 성공 시 <b>/analysis/step-1</b> 이동</span></div>
+      </div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag v">V1</span><span>이름 필수 입력</span></div>
+        <div class="av-row"><span class="tag v">V2</span><span>이메일 형식 검증(type=email)</span></div>
+        <div class="av-row"><span class="tag v">V3</span><span>비밀번호 8자 이상</span></div>
+        <div class="av-row"><span class="tag v">V4</span><span>비밀번호 확인란과 일치 여부 검증(불일치 시 오류 표시)</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">3/9페이지</div>
+</section>
+
+<!-- 03 ANA-1 -->
+<section class="doc-page" id="ana1">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>AI 분석 — 1단계 기본 자격 정보</td><th>화면 ID</th><td class="id">ANA-001</td></tr>
+    <tr><th>위 치</th><td>/analysis/step-1</td><th>파일명</th><td>AnalysisStep1View.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap"><div class="mk-col">
+      <div class="mk-row" style="justify-content:center; gap:16px; font-size:11.5px; font-weight:700;"><span style="color:var(--navy);">① STEP 1 기본 자격 정보</span><span style="color:var(--muted);">— — —</span><span style="color:var(--muted); font-weight:600;">② STEP 2</span></div>
+      <div class="mk-card" style="padding:18px;">
+        <div class="mk-grid2">
+          <div class="mk-field"><label><span class="tag v">V1</span>나이 (만)</label><div class="input">30</div></div>
+          <div class="mk-field"><label>최종 학력</label><div class="input">학력 선택 ▾</div></div>
+          <div class="mk-field"><label>전공</label><div class="input">예: 컴퓨터공학</div></div>
+          <div class="mk-field"><label>현재 직업</label><div class="input">예: 소프트웨어 엔지니어</div></div>
+        </div>
+        <div class="mk-field" style="margin-top:12px;"><label>총 관련 경력 연수</label><div class="input">5 년</div></div>
+        <div class="mk-grid2" style="margin-top:12px; border-top:1px dashed var(--line); padding-top:12px;">
+          <div class="mk-field"><label>영어시험 종류</label><div class="input">미응시 ▾</div></div>
+          <div class="mk-field"><label><span class="tag v">V2</span>영어 종합점수</label><div class="input" style="opacity:.5;">시험 선택 시 필수</div></div>
+        </div>
+        <span class="mk-btn primary" style="justify-content:center; margin-top:16px;"><span class="tag a">A1</span>다음 단계로 →</span>
+      </div>
+    </div></div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">로그인 필요 화면. 실제 &lt;form&gt; + native validation 사용 — 유효하지 않으면 다음 단계로 진행할 수 없고 사유가 화면에 표시됩니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>"다음 단계로" 클릭 → 검증 통과 시 <b>/analysis/step-2</b> 이동, 실패 시 첫 번째 오류 필드의 사유를 하단에 표시하고 이동 차단</span></div>
+      </div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag v">V1</span><span>나이 18~64, 학력/전공/직업/경력연수(0~40) 필수</span></div>
+        <div class="av-row"><span class="tag v">V2</span><span>영어시험 선택 시 영어 종합점수 필수 + 0 이상 숫자만 입력 가능</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">4/9페이지</div>
+</section>
+
+<!-- 04 ANA-2 -->
+<section class="doc-page" id="ana2">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>AI 분석 — 2단계 경력 및 선호 정보</td><th>화면 ID</th><td class="id">ANA-002</td></tr>
+    <tr><th>위 치</th><td>/analysis/step-2</td><th>파일명</th><td>AnalysisStep2View.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap"><div class="mk-col">
+      <div class="mk-row" style="justify-content:center; gap:16px; font-size:11.5px; font-weight:700;"><span style="color:var(--muted);">✓ STEP 1</span><span style="color:var(--muted);">— — —</span><span style="color:var(--navy);">② STEP 2 경력 및 선호 정보</span></div>
+      <div class="mk-card" style="padding:18px;">
+        <div class="mk-field"><label><span class="tag v">V1</span>상세 경력기술서 (100~2000자)</label><div class="input" style="height:56px; align-items:flex-start;">주요 담당 업무, 프로젝트, 기술 스택을 작성해주세요…</div></div>
+        <div class="mk-grid2" style="margin-top:12px;">
+          <div class="mk-field"><label><span class="tag v" style="width:16px;height:16px;font-size:9px;">V2</span>보유 자금 구간</label><div class="input">구간 선택 ▾</div></div>
+          <div class="mk-field"><label>가족 동반 여부</label><div class="mk-row"><span class="mk-btn dark" style="flex:1; justify-content:center;">단독 이주</span><span class="mk-btn" style="flex:1; justify-content:center;">가족 동반</span></div></div>
+        </div>
+        <div class="mk-field" style="margin-top:12px;"><label><span class="tag v" style="width:16px;height:16px;font-size:9px;">V3</span>관심 국가</label>
+          <div class="mk-grid4">
+            <span class="mk-card" style="text-align:center; padding:10px; border:2px solid var(--gold-2);">🇨🇦 캐나다</span>
+            <span class="mk-card" style="text-align:center; padding:10px;">🇦🇺 호주</span>
+            <span class="mk-card" style="text-align:center; padding:10px;">🇬🇧 영국</span>
+            <span class="mk-card" style="text-align:center; padding:10px;">🌐 상관없음</span>
+          </div>
+        </div>
+        <div class="mk-row between" style="margin-top:16px;">
+          <span class="mk-btn"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A1</span>← 이전</span>
+          <span class="mk-btn primary"><span class="tag a">A2</span>AI 분석 시작하기 ✨</span>
+        </div>
+      </div>
+    </div></div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">1단계 입력값은 Pinia 스토어에 유지되어 "이전" 클릭 후 되돌아와도 그대로 보존됩니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>"← 이전" 클릭 → <b>/analysis/step-1</b>로 복귀(입력값 보존)</span></div>
+        <div class="av-row"><span class="tag a">A2</span><span>"AI 분석 시작하기" 클릭 → 분석 요청 생성 후 <b>/analysis/loading</b> 이동</span></div>
+      </div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag v">V1</span><span>상세 경력기술서 100~2000자 필수</span></div>
+        <div class="av-row"><span class="tag v">V2</span><span>보유 자금 구간 필수 선택</span></div>
+        <div class="av-row"><span class="tag v">V3</span><span>관심 국가 필수 선택(4지선다)</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">5/9페이지</div>
+</section>
+
+<!-- 05 ANA-3 -->
+<section class="doc-page" id="ana3">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>AI 분석 — 로딩</td><th>화면 ID</th><td class="id">ANA-003</td></tr>
+    <tr><th>위 치</th><td>/analysis/loading</td><th>파일명</th><td>AnalysisLoadingView.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap"><div class="mk-col">
+      <div class="mk-row between" style="font-size:11px; color:var(--muted); font-weight:700;"><span style="color:var(--navy);">✓ 입력 완료</span><div class="mk-bar" style="flex:1; margin:0 10px;"><span style="width:64%;"></span></div><span style="color:var(--navy);">AI 분석 중</span><span>추천 결과</span></div>
+      <div class="mk-card" style="padding:22px; text-align:center;">
+        <div class="mk-h1">입력하신 정보를 분석하고 있습니다.</div>
+        <p class="mk-sub">국가별 자격 요건, 경력·직업군 유사도와 정착 환경 데이터를 비교하고 있습니다.</p>
+        <div class="mk-row" style="justify-content:center; align-items:center; gap:24px; margin-top:14px;">
+          <div class="mk-card" style="border:2px solid var(--navy); padding:16px 22px;"><div style="font-size:24px; font-weight:800; color:var(--navy);">64%</div><div class="mk-sub" style="font-size:10px;">PROCESSING</div></div>
+          <div class="mk-col" style="text-align:left; font-size:12px;">
+            <div>✔ 기본 자격 요건 확인</div><div>↻ 경력·직업군 매칭</div>
+            <div style="color:var(--muted);">○ 국가별 환경 데이터 분석</div><div style="color:var(--muted);">○ 추천 결과 생성</div>
+          </div>
+        </div>
+        <div class="mk-row" style="justify-content:center; margin-top:16px;"><span class="mk-btn"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A1</span>분석 취소</span></div>
+      </div>
+    </div></div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">2.5초 간격으로 분석 상태를 폴링합니다. 상태가 COMPLETED가 되면 결과 화면으로 자동 이동하고, FAILED면 오류 메시지를 표시합니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>"분석 취소" 클릭 → 폴링 중단 후 <b>/analysis/step-2</b>로 복귀</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">6/9페이지</div>
+</section>
+
+<!-- 06 RES -->
+<section class="doc-page" id="res">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>추천 결과</td><th>화면 ID</th><td class="id">RES-001</td></tr>
+    <tr><th>위 치</th><td>/results/{analysisId}</td><th>파일명</th><td>AnalysisResultView.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap"><div class="mk-col">
+      <div class="mk-row between"><div class="mk-h1" style="font-size:15px;">📊 AI 맞춤 이민 분석 결과</div><span class="mk-chip">ⓘ 점수 안내</span></div>
+      <div class="mk-grid3">
+        <div class="mk-card" style="padding:12px; border:2px solid var(--gold-2);">
+          <span class="mk-chip" style="border-color:var(--gold-2); color:var(--gold-2); font-weight:700;">BEST MATCH</span>
+          <div style="font-weight:800; margin-top:6px;">🇨🇦 캐나다</div>
+          <div class="mk-row between"><span class="mk-sub">Express Entry</span><span style="font-size:20px; font-weight:800; color:var(--navy);">87</span></div>
+          <div class="mk-sub" style="margin-top:4px;">환경 82</div><div class="mk-bar"><span style="width:82%;"></span></div>
+          <div class="mk-sub" style="margin-top:4px;">유사도 91</div><div class="mk-bar"><span style="width:91%;"></span></div>
+        </div>
+        <div class="mk-card" style="padding:12px;"><div style="font-weight:800;">🇦🇺 호주</div><div class="mk-row between"><span class="mk-sub">Subclass 189</span><span style="font-size:20px; font-weight:800;">74</span></div></div>
+        <div class="mk-card" style="padding:12px;"><div style="font-weight:800;">🇬🇧 영국</div><div class="mk-row between"><span class="mk-sub">Skilled Worker</span><span style="font-size:20px; font-weight:800;">61</span></div></div>
+      </div>
+      <div class="mk-card" style="padding:14px;">
+        <table class="mk-table"><thead><tr><th>지표</th><th>캐나다</th><th>호주</th><th>영국</th></tr></thead><tbody><tr><td>종합 적합도</td><td><b>87</b></td><td>74</td><td>61</td></tr></tbody></table>
+      </div>
+      <div class="mk-card" style="padding:14px;">
+        <div style="font-weight:700; font-size:12.5px; margin-bottom:8px;">📋 준비 체크리스트</div>
+        <div class="mk-grid2"><div class="mk-row" style="align-items:center;"><span class="mk-check"></span><span class="mk-sub">유효한 여권</span></div><div class="mk-row" style="align-items:center;"><span class="mk-check"></span><span class="mk-sub">공인 영어 성적표</span></div></div>
+      </div>
+      <div class="mk-row" style="justify-content:flex-end; gap:8px;">
+        <span class="mk-btn"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A1</span>PDF 저장</span>
+        <span class="mk-btn"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A2</span>공유하기</span>
+        <span class="mk-btn"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A3</span>다시 분석</span>
+        <span class="mk-btn dark"><span class="tag a">A4</span>AI에게 질문하기</span>
+      </div>
+    </div></div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">본인 소유 분석 결과만 열람 가능 — 다른 사용자의 analysisId로 접근 시 403 처리됩니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>"PDF로 저장" 클릭 → 결과 리포트 PDF 다운로드</span></div>
+        <div class="av-row"><span class="tag a">A2</span><span>"공유하기" 클릭 → 공유 링크 생성/토글</span></div>
+        <div class="av-row"><span class="tag a">A3</span><span>"다시 분석하기" 클릭 → <b>/analysis/step-1</b>(수정 모드, 기존 입력값 자동 반영)</span></div>
+        <div class="av-row"><span class="tag a">A4</span><span>"AI에게 결과 질문하기" 클릭 → <b>/chat</b> 이동(해당 국가 컨텍스트 유지)</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">7/9페이지</div>
+</section>
+
+<!-- 07 CHAT -->
+<section class="doc-page" id="chat">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>AI 상담</td><th>화면 ID</th><td class="id">CHAT-001</td></tr>
+    <tr><th>위 치</th><td>/chat</td><th>파일명</th><td>AiChatView.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap"><div class="mk-col">
+      <div class="mk-row between">
+        <span class="input" style="width:110px; padding:6px 10px;"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A1</span>🇨🇦 캐나다 ▾</span>
+        <div class="mk-row"><span class="mk-btn"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A3</span>새 대화</span><span class="mk-btn"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A4</span>히스토리</span></div>
+      </div>
+      <div class="mk-card mk-col" style="padding:16px; gap:10px;">
+        <div class="mk-bubble">안녕하세요! 해외 이주 및 비자 관련하여 궁금한 점을 물어보세요.</div>
+        <div class="mk-row" style="gap:6px;"><span class="mk-chip"><span class="tag a" style="width:15px;height:15px;font-size:8.5px;">A2</span>#캐나다 Express Entry 기본 자격</span><span class="mk-chip">#캐나다 CRS 점수 산정 기준</span><span class="mk-chip">#캐나다 영어 점수 기준</span></div>
+        <div class="mk-bubble user">캐나다 Express Entry 기본 자격이 어떻게 되나요?</div>
+        <div class="mk-bubble">CRS 점수, 학력, 경력, 언어 점수를 기준으로 자격을 산정합니다… 🔗 IRCC 공식 문서</div>
+      </div>
+      <div class="mk-row"><span class="input" style="flex:1;"><span class="tag v" style="width:16px;height:16px;font-size:9px;">V1</span>이주 계획에 대해 무엇이든 물어보세요...</span><span class="mk-btn dark">전송 ➤</span></div>
+    </div></div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">RAG 기반 응답 — 근거 문서 유사도가 임계값 미만이면 "근거 문서 없음"으로 표시. 추천 태그는 이미 물어본 항목을 제외하고 다른 후보로 교체됩니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>국가 선택 변경 → 해당 국가 전용 추천 태그 3개로 갱신</span></div>
+        <div class="av-row"><span class="tag a">A2</span><span>추천 태그 클릭 → 해당 질문 자동 전송(물어본 태그는 다음 후보로 교체)</span></div>
+        <div class="av-row"><span class="tag a">A3</span><span>"새 대화" 클릭 → 세션/태그 상태 초기화</span></div>
+        <div class="av-row"><span class="tag a">A4</span><span>"히스토리" 클릭 → 과거 상담 세션 검색·조회</span></div>
+      </div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag v">V1</span><span>질문 입력 2자 이상, 1000자 이하</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">8/9페이지</div>
+</section>
+
+<!-- 08 MY -->
+<section class="doc-page" id="my">
+  <table class="meta-table">
+    <tr><th>화면명</th><td>내 결과</td><th>화면 ID</th><td class="id">MY-001</td></tr>
+    <tr><th>위 치</th><td>/my-results</td><th>파일명</th><td>MyResultsView.vue</td></tr>
+  </table>
+  <div class="doc-body">
+    <div class="mockup-wrap"><div class="mk-col">
+      <div class="mk-card" style="background:var(--navy); color:#fff; padding:18px; border:none;">
+        <div class="mk-row between">
+          <div><div style="font-weight:800; font-size:15px;">안녕하세요, 진아님</div><div style="font-size:11.5px; opacity:.75; margin-top:4px;">📅 최근 분석일: 2026-07-28</div></div>
+          <span class="mk-btn" style="border-color:#fff; color:#fff; background:transparent;"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A1</span>프로필 수정</span>
+        </div>
+      </div>
+      <div class="mk-row between"><span style="font-weight:700; font-size:13px;">최근 분석 이력</span><span class="mk-sub">총 3건</span></div>
+      <div class="mk-card mk-row between" style="padding:14px;">
+        <div><div class="mk-sub">분석일: 2026-07-28</div><div style="font-weight:700; font-size:12.5px; margin-top:2px;">🇨🇦 1위 추천: 캐나다 (CAN)</div><div class="mk-sub">대표 비자: Express Entry</div></div>
+        <div class="mk-row" style="align-items:center; gap:14px;"><div style="text-align:right;"><div style="font-size:18px; font-weight:800; color:var(--navy);">87점</div><div class="mk-sub" style="font-size:9.5px;">종합 적합도</div></div><span class="mk-btn dark"><span class="tag a" style="width:16px;height:16px;font-size:9px;">A2</span>다시 보기</span></div>
+      </div>
+    </div></div>
+    <aside class="desc-panel">
+      <div class="desc-head">Description</div>
+      <div class="desc-section-label">Check Point</div>
+      <div class="checkpoint">분석 이력이 없으면 빈 상태 안내와 함께 첫 분석 시작 링크를 노출합니다.</div>
+      <div class="av-group">
+        <div class="av-row"><span class="tag a">A1</span><span>"프로필 수정" 클릭 → <b>/analysis/step-1?mode=edit</b>(이전 입력값 자동 채움)</span></div>
+        <div class="av-row"><span class="tag a">A2</span><span>"다시 보기" 클릭 → <b>/results/{id}</b> 이동</span></div>
+      </div>
+    </aside>
+  </div>
+  <div class="page-foot">9/9페이지</div>
+</section>
