@@ -17,7 +17,7 @@
 | CSS Framework | **Tailwind CSS 4.3.2** — Stitch 화면의 색상, 간격과 반응형 UI를 Vue 컴포넌트로 이전할 때 사용한다. |
 | HTTP Client | **Axios 1.18.1** — Vue에서 Spring Boot REST API를 호출하고 JWT 요청 헤더와 공통 오류를 처리한다. |
 | Frontend Test | **Vitest 4.1.10**, **Vue Test Utils 2.4.11** — 폼 검증, 탭 전환, API 응답과 화면 이동을 테스트한다. |
-| Backend Language | **Java 21 LTS** — 장기 지원과 안정성을 고려한 백엔드 개발 언어 버전이다. |
+| Backend Language | **Java 17 LTS** — 장기 지원과 안정성을 고려한 백엔드 개발 언어 버전이다. |
 | Backend Framework | **Spring Boot 4.1.0** — 회원가입, 로그인, 사용자 프로필, 분석 이력 및 FastAPI 중계 API를 구현한다. |
 | Spring Core | **Spring Framework 7.0.8 이상** — Spring Boot 기반 프레임워크이며 버전은 Spring Boot BOM에서 관리한다. |
 | Security | **Spring Security 7.1.0** — BCrypt 비밀번호 암호화, 로그인 인증, JWT 검증과 보호 API 접근 제어에 사용한다. |
@@ -75,7 +75,7 @@ Vue Test Utils 2.4.11
 ### Backend
 
 ```text
-Java 21 LTS
+Java 17 LTS
 Spring Boot 4.1.0
 Spring Framework 7.0.8 이상
 Spring Security 7.1.0
