@@ -90,4 +90,26 @@ describe('AnalysisStep1View', () => {
     // The next route's component is lazy-loaded; wait for the async navigation to settle.
     await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/analysis/step-2'))
   })
+
+  it('does not navigate to step 2 when a language test is chosen but no score is entered', async () => {
+    const wrapper = mount(AnalysisStep1View, { global: { plugins: [i18n, router] } })
+    await flushPromises()
+
+    const numberInputs = wrapper.findAll('input[type="number"]')
+    const textInputs = wrapper.findAll('input[type="text"]')
+    const selects = wrapper.findAll('select')
+
+    await numberInputs[0].setValue(30) // age
+    await selects[0].setValue('BACHELOR') // education
+    await textInputs[0].setValue('경영학') // major
+    await textInputs[1].setValue('데이터 분석가') // occupation
+    await numberInputs[1].setValue(6) // experienceYears
+    await selects[1].setValue('IELTS_GENERAL') // languageTest, languageScore left empty
+
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/analysis/step-1')
+    expect(wrapper.find('.text-red-600').exists()).toBe(true)
+  })
 })

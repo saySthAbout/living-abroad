@@ -122,7 +122,7 @@ function goNext() {
         </label>
         <label class="block">
           <span class="text-sm font-medium text-navy-950">{{ t('step1.languageScore') }}</span>
-          <input v-model.number="form.languageScore" type="number" step="0.1" min="0" inputmode="decimal" @keydown="blockNonNumericKey" :placeholder="t('step1.languageScorePlaceholder')" :disabled="!form.languageTest" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none disabled:cursor-not-allowed disabled:bg-soft-100 disabled:text-slate-400" />
+          <input v-model.number="form.languageScore" type="number" step="0.1" min="0" inputmode="decimal" @keydown="blockNonNumericKey" :placeholder="t('step1.languageScorePlaceholder')" :disabled="!form.languageTest" :required="!!form.languageTest" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none disabled:cursor-not-allowed disabled:bg-soft-100 disabled:text-slate-400" />
         </label>
       </div>
 

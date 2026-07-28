@@ -1,5 +1,6 @@
 package com.livingabroad.backend.dto.analysis;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -42,4 +43,8 @@ public record AnalysisCreateRequest(
     @NotBlank @Size(min = 100, max = 2000)
     String careerText
 ) {
+    @AssertTrue(message = "languageScore is required when languageTest is set")
+    public boolean isLanguageScoreValid() {
+        return languageTest == null || languageScore != null;
+    }
 }
