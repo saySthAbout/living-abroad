@@ -54,11 +54,21 @@ const historyItems = ref<ChatSessionSummary[]>([])
 const historyLoading = ref(false)
 const historyError = ref('')
 
-const starterChipKeys: Record<'CAN' | 'AUS' | 'GBR', string> = { CAN: 'Can', AUS: 'Aus', GBR: 'Gbr' }
+const starterChipPrefixes: Record<'CAN' | 'AUS' | 'GBR', string> = { CAN: 'Can', AUS: 'Aus', GBR: 'Gbr' }
+const askedStarterKeys = ref<string[]>([])
 const starterChips = computed(() => {
-  const key = starterChipKeys[countryCode.value]
-  return [t(`chat.starter${key}1`), t(`chat.starter${key}2`), t(`chat.starter${key}3`)]
+  const prefix = starterChipPrefixes[countryCode.value]
+  const keys = Array.from({ length: 6 }, (_, i) => `${prefix}${i + 1}`)
+  return keys
+    .filter((key) => !askedStarterKeys.value.includes(key))
+    .slice(0, 3)
+    .map((key) => ({ key, label: t(`chat.starter${key}`) }))
 })
+
+function sendStarterChip(key: string, label: string) {
+  askedStarterKeys.value.push(key)
+  sendQuestion(label)
+}
 const followUpChips = computed(() => [t('chat.followUp1'), t('chat.followUp2'), t('chat.followUp3'), t('chat.followUp4')])
 
 async function scrollToBottom() {
@@ -146,6 +156,7 @@ function startNewChat() {
   sessionId.value = null
   messages.value = [greetingMessage()]
   historyOpen.value = false
+  askedStarterKeys.value = []
 }
 </script>
 
@@ -254,11 +265,11 @@ function startNewChat() {
           <div v-if="index === 0" class="mt-2 flex flex-wrap gap-2">
             <button
               v-for="chip in starterChips"
-              :key="chip"
+              :key="chip.key"
               class="rounded-full border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:border-navy-700"
-              @click="sendQuestion(chip)"
+              @click="sendStarterChip(chip.key, chip.label)"
             >
-              # {{ chip }}
+              # {{ chip.label }}
             </button>
           </div>
           <div v-else-if="index === messages.length - 1" class="mt-2 flex flex-wrap gap-2">
