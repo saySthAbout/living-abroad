@@ -67,7 +67,7 @@ function goNext() {
       {{ t('step1.subtitle') }}
     </p>
 
-    <div class="mt-8 rounded-xl border border-slate-200 p-6 sm:p-8">
+    <form class="mt-8 rounded-xl border border-slate-200 p-6 sm:p-8" @submit.prevent="goNext">
       <div class="grid gap-5 sm:grid-cols-2">
         <label class="block">
           <span class="text-sm font-medium text-navy-950">{{ t('step1.age') }}</span>
@@ -122,10 +122,10 @@ function goNext() {
         <DisclaimerBox :text="t('step1.disclaimer')" />
       </div>
 
-      <button class="mt-6 w-full rounded-lg bg-gold-500 py-3 text-sm font-semibold text-navy-950 hover:bg-gold-400" @click="goNext">
+      <button type="submit" class="mt-6 w-full rounded-lg bg-gold-500 py-3 text-sm font-semibold text-navy-950 hover:bg-gold-400">
         {{ t('step1.nextButton') }}
       </button>
-    </div>
+    </form>
 
     <div class="mt-8 grid gap-4 sm:grid-cols-3">
       <div v-for="country in COUNTRIES" :key="country.code" :class="['flex h-24 items-end rounded-lg bg-gradient-to-br p-3', country.gradient]">

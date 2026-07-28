@@ -47,4 +47,45 @@ describe('AnalysisStep1View', () => {
     expect((numberInputs[2].element as HTMLInputElement).value).toBe('7.5')
     expect((selects[0].element as HTMLSelectElement).value).toBe('MASTER')
   })
+
+  it('does not navigate to step 2 when age is out of the allowed range', async () => {
+    const wrapper = mount(AnalysisStep1View, { global: { plugins: [i18n, router] } })
+    await flushPromises()
+
+    const numberInputs = wrapper.findAll('input[type="number"]')
+    const textInputs = wrapper.findAll('input[type="text"]')
+    const selects = wrapper.findAll('select')
+
+    await numberInputs[0].setValue(10) // age, below min="18"
+    await selects[0].setValue('BACHELOR') // education
+    await textInputs[0].setValue('경영학') // major
+    await textInputs[1].setValue('데이터 분석가') // occupation
+    await numberInputs[1].setValue(6) // experienceYears
+
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/analysis/step-1')
+  })
+
+  it('navigates to step 2 once all fields are valid', async () => {
+    const wrapper = mount(AnalysisStep1View, { global: { plugins: [i18n, router] } })
+    await flushPromises()
+
+    const numberInputs = wrapper.findAll('input[type="number"]')
+    const textInputs = wrapper.findAll('input[type="text"]')
+    const selects = wrapper.findAll('select')
+
+    await numberInputs[0].setValue(30) // age
+    await selects[0].setValue('BACHELOR') // education
+    await textInputs[0].setValue('경영학') // major
+    await textInputs[1].setValue('데이터 분석가') // occupation
+    await numberInputs[1].setValue(6) // experienceYears
+
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    // The next route's component is lazy-loaded; wait for the async navigation to settle.
+    await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/analysis/step-2'))
+  })
 })
