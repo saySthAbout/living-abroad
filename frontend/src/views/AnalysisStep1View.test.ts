@@ -66,6 +66,8 @@ describe('AnalysisStep1View', () => {
     await flushPromises()
 
     expect(router.currentRoute.value.path).toBe('/analysis/step-1')
+    expect(wrapper.find('.text-red-600').exists()).toBe(true)
+    expect(wrapper.find('.text-red-600').text().length).toBeGreaterThan(0)
   })
 
   it('navigates to step 2 once all fields are valid', async () => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAnalysisStore } from '@/stores/analysis'
@@ -13,6 +13,8 @@ const analysisStore = useAnalysisStore()
 const { t } = useI18n()
 
 const form = reactive({ ...analysisStore.step1Data })
+const formEl = ref<HTMLFormElement | null>(null)
+const errorMessage = ref('')
 
 onMounted(async () => {
   if (route.query.mode !== 'edit') return
@@ -43,6 +45,12 @@ function blockNonNumericKey(event: KeyboardEvent) {
 }
 
 function goNext() {
+  const invalidField = formEl.value?.querySelector<HTMLInputElement | HTMLSelectElement>(':invalid')
+  if (invalidField) {
+    errorMessage.value = invalidField.validationMessage || t('step1.validationError')
+    return
+  }
+  errorMessage.value = ''
   analysisStore.saveStep1({ ...form })
   router.push('/analysis/step-2')
 }
@@ -67,7 +75,7 @@ function goNext() {
       {{ t('step1.subtitle') }}
     </p>
 
-    <form class="mt-8 rounded-xl border border-slate-200 p-6 sm:p-8" @submit.prevent="goNext">
+    <form ref="formEl" class="mt-8 rounded-xl border border-slate-200 p-6 sm:p-8" @submit.prevent="goNext">
       <div class="grid gap-5 sm:grid-cols-2">
         <label class="block">
           <span class="text-sm font-medium text-navy-950">{{ t('step1.age') }}</span>
@@ -125,6 +133,7 @@ function goNext() {
       <button type="submit" class="mt-6 w-full rounded-lg bg-gold-500 py-3 text-sm font-semibold text-navy-950 hover:bg-gold-400">
         {{ t('step1.nextButton') }}
       </button>
+      <p v-if="errorMessage" class="mt-3 text-center text-sm text-red-600">{{ errorMessage }}</p>
     </form>
 
     <div class="mt-8 grid gap-4 sm:grid-cols-3">

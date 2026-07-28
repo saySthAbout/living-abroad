@@ -95,6 +95,7 @@ export default {
     languageScore: '영어 종합점수 (Overall)',
     languageScorePlaceholder: '예: 7.0',
     disclaimer: '모든 분석 결과는 공신력 있는 내부 분석 알고리즘에 기초하지만, 공식적인 법적 자문을 대체할 수 없습니다. 정보 기준일: 2026.07.21',
+    validationError: '입력하신 정보를 다시 확인해주세요.',
     nextButton: '다음 단계로 →',
   },
   step2: {

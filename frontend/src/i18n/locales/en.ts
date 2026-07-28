@@ -97,6 +97,7 @@ export default {
     languageScorePlaceholder: 'e.g. 7.0',
     disclaimer:
       'All analysis results are based on our internal analysis algorithm, but cannot replace official legal advice. Data as of: 2026.07.21',
+    validationError: 'Please check the information you entered.',
     nextButton: 'Next step →',
   },
   step2: {
