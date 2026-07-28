@@ -101,7 +101,7 @@ function goNext() {
       <div class="mt-5 grid gap-5 border-t border-slate-100 pt-5 sm:grid-cols-2">
         <label class="block">
           <span class="text-sm font-medium text-navy-950">{{ t('step1.languageTest') }}</span>
-          <select v-model="form.languageTest" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none">
+          <select v-model="form.languageTest" @change="form.languageTest === null && (form.languageScore = null)" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none">
             <option :value="null">{{ t('step1.languageTestNone') }}</option>
             <option value="IELTS_GENERAL">IELTS Academic/General</option>
             <option value="CELPIP">CELPIP</option>
@@ -110,7 +110,7 @@ function goNext() {
         </label>
         <label class="block">
           <span class="text-sm font-medium text-navy-950">{{ t('step1.languageScore') }}</span>
-          <input v-model.number="form.languageScore" type="number" step="0.1" :placeholder="t('step1.languageScorePlaceholder')" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none" />
+          <input v-model.number="form.languageScore" type="number" step="0.1" :placeholder="t('step1.languageScorePlaceholder')" :disabled="!form.languageTest" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-navy-700 focus:outline-none disabled:cursor-not-allowed disabled:bg-soft-100 disabled:text-slate-400" />
         </label>
       </div>
 
