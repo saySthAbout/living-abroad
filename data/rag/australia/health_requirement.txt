@@ -1,0 +1,17 @@
+문서명: 호주 비자 건강 요건 (Health Requirement)
+국가: AUS
+비자 코드: AU_SKILLED_INDEPENDENT_189
+출처 URL: https://immi.homeaffairs.gov.au/help-support/meeting-our-requirements/health
+검증일: 2026-07-29
+
+---
+
+Most Australian visa applicants, including Skilled Independent visa (subclass 189) applicants, must meet a minimum health standard before the Department of Home Affairs will grant a visa — this is called "meeting the health requirement." Health may be assessed as part of the visa application process, and family members might also need to meet the health requirement even if they are not migrating to Australia themselves, depending on the visa applied for.
+
+To meet the health requirement, an applicant must be free from any disease or condition that would be a significant healthcare and community service cost to Australia, or that is likely to limit the access of Australian citizens and permanent residents to healthcare and community services that are in short supply (this is called "prejudicing access").
+
+Applicants may be required to undergo health examinations, which are assessed by a Medical Officer of the Commonwealth (MOC). If a significant medical condition is found, the MOC advises whether it is likely to threaten public health, result in significant healthcare/community service costs, or place demand on services that are already in short supply. The MOC's assessment considers only the medical situation itself, not personal circumstances such as having private health insurance or the financial means to pay for treatment.
+
+Depending on the outcome, an applicant may be asked to sign a health undertaking, and in some cases a health waiver may be available. There is also special consideration (in effect since 16 October 2024) for children who were born and are ordinarily resident in Australia and do not meet the health requirement.
+
+Why this matters: meeting the health requirement protects the Australian community from public health risks (especially active tuberculosis), helps manage government spending on health/social services, and preserves access to healthcare and community services that are already in short supply for Australian citizens and permanent residents.

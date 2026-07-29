@@ -1,0 +1,15 @@
+문서명: Immigration Salary List (급여 할인 대상 직업 목록)
+국가: GBR
+비자 코드: UK_SKILLED_WORKER
+출처 URL: https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-immigration-salary-list
+검증일: 2026-07-29
+
+---
+
+The Immigration Salary List is an official list of specific occupations (identified by SOC 2020 occupation codes) where a reduced skills and salary threshold applies under the Skilled Worker route, instead of the standard minimum salary or the job's usual "going rate." An occupation only counts as being on the list if the certificate of sponsorship for that application was issued before the removal date stated for that entry, and coverage can differ by nation within the UK (England, Scotland, Wales, Northern Ireland).
+
+Occupations currently on the list span a wide range of sectors, for example: certain care worker and senior care worker roles (codes 6135/6136, though jobs located in England are only eligible if the sponsor is registered with the Care Quality Commission and is actively carrying out a regulated activity), nursing auxiliaries and assistants (6131, only where registered nurse or other registered healthcare professional roles also exist at the employer), several skilled trades (bricklayers, roofers, carpenters and joiners, stonemasons), specific scientific and creative roles (biological scientists, graphic and multimedia designers, artists, arts officers/producers/directors), and a small number of highly specific roles such as internationally recognised classical/contemporary ballet dancers or orchestral musicians meeting defined standards, and residential/day/domiciliary care managers.
+
+Most entries on the list have a removal date of 31 December 2026, though care worker and senior care worker entries (6135, 6136) currently have a later removal date of 22 July 2028. Eligibility for some occupation codes is further restricted by specific conditions set out in Appendix Skilled Worker (for example, private households or individuals — other than sole traders sponsoring someone for their own business — cannot sponsor Skilled Worker applicants in certain care-related codes).
+
+Because this list changes periodically and removal dates apply per occupation, an applicant or sponsor should check the current, exact SOC 2020 occupation code entry rather than assuming continued eligibility — being on the list at one point does not guarantee the same salary discount will still apply later in the process.
