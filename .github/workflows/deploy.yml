@@ -1,0 +1,26 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into GCP VM and redeploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USER }}
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          command_timeout: 20m
+          script: |
+            set -e
+            cd ~/living-abroad
+            git fetch origin
+            git checkout main
+            git reset --hard origin/main
+            docker compose up -d --build
+            docker image prune -f
