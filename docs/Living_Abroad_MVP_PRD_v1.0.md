@@ -125,8 +125,7 @@ Vue 3 + Vite + TypeScript → Spring Boot → FastAPI → PostgreSQL/pgvector
 | POST | /api/analyses | 분석 요청 생성 | Spring Boot → FastAPI |
 | GET | /api/analyses/{id} | 분석 결과 조회 | Spring Boot |
 | GET | /api/analyses | 내 분석 이력 조회 | Spring Boot |
-| POST | /ai/recommend | 규칙·ML 점수 및 순위 산출 | FastAPI |
-| POST | /ai/career-match | 경력·직업 임베딩 유사도 | FastAPI |
+| POST | /ai/recommend | 규칙·ML 점수, 경력·직업 임베딩 유사도, 순위 산출 (통합 응답) | FastAPI |
 | POST | /api/chat | RAG 상담 요청 | Spring Boot → FastAPI |
 | POST | /ai/rag/answer | 검색·근거·LLM 답변 생성 | FastAPI |
 
@@ -137,10 +136,10 @@ Vue 3 + Vite + TypeScript → Spring Boot → FastAPI → PostgreSQL/pgvector
 |---|---|---|
 | users | 사용자 계정 | id, email, password_hash, name, created_at |
 | user_profiles | 분석용 프로필 | age, education, major, occupation, experience_years, language_test, language_score, funds_range, family_accompanied, preferred_country, career_text |
-| analysis_requests | 분석 실행 단위 | id, user_id, status, requested_at, completed_at, model_version |
+| analyses | 분석 실행 단위 | id, user_id, status, requested_at, completed_at, model_version |
 | analysis_country_results | 국가별 결과 | analysis_id, country_code, rank, total_score, environment_score, career_similarity, visa_code |
-| analysis_reasons | 강점·보완 근거 | analysis_country_result_id, reason_type, label, description |
-| checklist_items | 비자별 준비 항목 | visa_code, item_code, item_name, display_order |
+| analysis_result_reasons | 강점·보완 근거 | result_id, reason_type, reason_content, sort_order |
+| analysis_occupation_matches | 경력·직업 매칭 결과 | result_id, occupation_id, similarity_score, match_rank, match_reason |
 | policy_documents | RAG 원문 메타데이터 | country_code, visa_code, title, source_url, verified_at, content_hash |
 | policy_chunks | 벡터 검색 단위 | document_id, chunk_text, embedding, chunk_index |
 | chat_sessions | AI 상담 세션 | id, user_id, analysis_id, created_at |

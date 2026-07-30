@@ -23,7 +23,7 @@
 | Security | **Spring Security 7.1.0** — BCrypt 비밀번호 암호화, 로그인 인증, JWT 검증과 보호 API 접근 제어에 사용한다. |
 | JWT | **Spring Security OAuth2 Resource Server + JOSE** — `JwtEncoder`와 `JwtDecoder`를 사용해 JWT를 발급하고 검증한다. |
 | ORM | **Spring Data JPA 4.1 계열**, Hibernate — 사용자, 프로필, 분석 결과 및 상담 기록을 PostgreSQL에 저장한다. |
-| Backend Build Tool | **Gradle 8.14.x** — Spring Boot 프로젝트의 의존성 관리와 빌드를 담당한다. |
+| Backend Build Tool | **Gradle 9.5.1** — Spring Initializr가 Spring Boot 4.1.0 호환 버전으로 결정한 Gradle 래퍼 버전이다 (당초 계획했던 8.14.x보다 상위). |
 | Embedded Server | **Tomcat 11.0.x** — Spring Boot REST API 실행 서버이며 버전은 Spring Boot에서 관리한다. |
 | AI Language | **Python 3.12.x** — 머신러닝, 임베딩, RAG와 FastAPI 서버 구현에 사용한다. |
 | AI API Framework | **FastAPI 0.139.0** — 비자 규칙, 국가 환경 분석, 경력 매칭 및 RAG API를 제공한다. |
@@ -40,12 +40,13 @@
 | Open-source LLM | **`Qwen/Qwen3-8B-AWQ`** — 한국어·영어 질의응답과 다국어 RAG에 사용할 자체 호스팅 생성 모델이다. MVP 상담에서는 응답 속도와 근거 중심 답변을 위해 비사고 모드(`enable_thinking=false`)를 기본값으로 사용한다. |
 | LLM / RAG | **Qwen3-8B-AWQ + vLLM + 직접 구현 RAG Pipeline** — 공식 정책 문서를 청킹하고 pgvector에서 검색한 뒤 검색 근거를 자체 호스팅 LLM에 전달한다. 외부 OpenAI·Claude API는 필수 의존성에서 제외한다. |
 | AI Test | **Pytest 9.1.1**, FastAPI TestClient — 점수 범위, 결측치 처리, 입력 재현성과 RAG 출처 반환을 테스트한다. |
-| Database | **PostgreSQL 16.14** — 현재 로컬 개발 환경에 설치된 PostgreSQL 16 계열을 사용한다. |
+| Database (로컬 개발) | **PostgreSQL 16.14** — 이 개발 머신의 Docker Desktop이 고장나 있어, 네이티브로 설치한 PostgreSQL 16 계열 + 직접 빌드한 pgvector 0.8.0으로 로컬 개발을 진행한다. |
+| Database (배포) | **PostgreSQL 18** — GCP 배포 환경은 Docker `pgvector/pgvector:0.8.2-pg18` 이미지를 사용한다. 로컬(16)과 배포(18) DB 메이저 버전이 다르다는 점에 유의한다. |
 | PostgreSQL Client | **psql 16.14** — `psql --version` 명령으로 확인한 로컬 명령줄 클라이언트 버전이다. |
-| Vector Database | **pgvector 0.8.2** — 정책 문서와 직업 설명 임베딩을 저장하고 코사인 거리 기반으로 검색한다. |
-| Reverse Proxy | **Nginx 1.30.3 Stable** — Vue 정적 파일 제공, Spring Boot·FastAPI 프록시와 HTTPS 연결에 사용한다. |
-| Container | **Docker Engine 29.6.0**, Docker Desktop 4.82.0, Docker Compose 5.3.0 — 서비스를 컨테이너 단위로 구성한다. |
-| Database Image | **`pgvector/pgvector:0.8.2-pg16`** — PostgreSQL 16 계열과 pgvector가 함께 설치된 컨테이너 이미지다. |
+| Vector Database | **pgvector 0.8.2** (배포) / **0.8.0** (로컬, 직접 빌드) — 정책 문서와 직업 설명 임베딩을 저장하고 코사인 거리 기반으로 검색한다. |
+| Reverse Proxy | **Nginx 1.30-alpine** — Vue 정적 파일 제공, Spring Boot·FastAPI 프록시와 HTTPS 연결에 사용한다. |
+| Container | **Docker Compose** — 배포 환경(GCP)에서 서비스를 컨테이너 단위로 구성한다. 로컬은 Docker Desktop 미사용, 네이티브 설치로 대체. |
+| Database Image | **`pgvector/pgvector:0.8.2-pg18`** — 배포 환경에서 PostgreSQL 18과 pgvector가 함께 설치된 컨테이너 이미지다. |
 | API Communication | **REST API, JSON, Spring WebClient** — Vue, Spring Boot 및 FastAPI 사이의 데이터 통신에 사용한다. |
 | API Test Tool | **Postman 최신 안정 버전** — Spring Boot·FastAPI API 요청, 응답과 JWT 헤더를 테스트한다. |
 | Version Control | **Git 2.x, GitHub** — 소스 코드, 브랜치, Issues, README와 포트폴리오를 관리한다. |
@@ -124,13 +125,11 @@ External LLM API: 사용하지 않음
 ### Database 및 배포
 
 ```text
-PostgreSQL 16.14
-psql 16.14
-pgvector 0.8.2
-Nginx 1.30.3
-Docker Engine 29.6.0
-Docker Desktop 4.82.0
-Docker Compose 5.3.0
+로컬 개발: PostgreSQL 16.14 (네이티브 설치) + pgvector 0.8.0 (직접 빌드)
+배포(GCP): pgvector/pgvector:0.8.2-pg18 (Docker, PostgreSQL 18 + pgvector 0.8.2)
+psql 16.14 (로컬 클라이언트)
+Nginx 1.30-alpine
+Docker Compose (배포 환경, GCP Compute Engine VM)
 ```
 
 
