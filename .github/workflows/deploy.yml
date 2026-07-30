@@ -24,4 +24,5 @@ jobs:
             git checkout main
             git reset --hard origin/main
             docker compose up -d --build
+            docker compose restart nginx
             docker image prune -f
