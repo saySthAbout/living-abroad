@@ -18,6 +18,7 @@ jobs:
           command_timeout: 20m
           script: |
             set -e
+            git config --global --add safe.directory /home/saysthabout/living-abroad
             cd /home/saysthabout/living-abroad
             git fetch origin
             git checkout main
