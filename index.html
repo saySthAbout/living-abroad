@@ -32,6 +32,9 @@
     padding:.8rem 1.8rem; border-radius:8px; font-weight:600; font-size:.95rem;
   }
   a.btn:hover{ background:var(--navy-2); }
+  a.btn.secondary{ background:var(--panel); color:var(--ink); border:1px solid var(--line); }
+  a.btn.secondary:hover{ border-color:var(--navy-2); }
+  .btn-row{ display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; }
   .meta{ margin-top:1.5rem; font-size:.8rem; color:var(--ink-soft); }
 </style>
 </head>
@@ -39,8 +42,11 @@
   <div class="card">
     <div class="kicker">Portfolio</div>
     <h1>Living Abroad — 프로젝트 보고서</h1>
-    <p>AI 기반 해외 취업·이주 가이드 플랫폼 — 시스템 개요, 기획, 설계, 트러블슈팅을 정리한 보고서입니다.</p>
-    <a class="btn" href="./living-abroad-report.pdf" target="_blank" rel="noopener">PDF 보기</a>
+    <p>AI 기반 해외 취업·이주 가이드 플랫폼 — 시스템 개요, 기획, 설계, 트러블슈팅을 정리한 보고서와, 화면 설계·테스트·서비스 검증을 담은 별첨입니다.</p>
+    <div class="btn-row">
+      <a class="btn" href="./living-abroad-report.pdf" target="_blank" rel="noopener">보고서 PDF</a>
+      <a class="btn secondary" href="./living-abroad-appendix.pdf" target="_blank" rel="noopener">별첨 PDF</a>
+    </div>
     <div class="meta">곽진아 · 2026.07.30</div>
   </div>
 </body>
