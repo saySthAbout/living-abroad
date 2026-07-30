@@ -112,14 +112,14 @@ onMounted(async () => {
     <div class="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8">
       <div class="mb-8 flex border-b border-slate-200 text-center">
         <button
-          class="flex-1 pb-3 text-sm font-semibold"
+          class="flex-1 cursor-pointer pb-3 text-sm font-semibold"
           :class="activeTab === 'login' ? 'border-b-2 border-navy-950 text-navy-950' : 'text-slate-400'"
           @click="switchTab('login')"
         >
           {{ t('auth.loginTab') }}
         </button>
         <button
-          class="flex-1 pb-3 text-sm font-semibold"
+          class="flex-1 cursor-pointer pb-3 text-sm font-semibold"
           :class="activeTab === 'signup' ? 'border-b-2 border-navy-950 text-navy-950' : 'text-slate-400'"
           @click="switchTab('signup')"
         >
