@@ -18,7 +18,7 @@ jobs:
           command_timeout: 20m
           script: |
             set -e
-            cd ~/living-abroad
+            cd /home/saysthabout/living-abroad
             git fetch origin
             git checkout main
             git reset --hard origin/main
