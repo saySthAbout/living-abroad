@@ -111,7 +111,7 @@ def _generate_answer(question: str, chunks: list[dict]) -> str:
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": _build_user_prompt(question, chunks)},
         ],
-        temperature=0.2,
+        temperature=0.1,
         # Qwen3는 요청 단위로 thinking mode를 꺼야 한다 (서버 시작 옵션이 아님).
         # Ollama 등 이 파라미터를 모르는 백엔드는 그냥 무시한다.
         extra_body={"chat_template_kwargs": {"enable_thinking": False}},

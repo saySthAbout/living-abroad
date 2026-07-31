@@ -2,6 +2,9 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
 models/*
 !models/environment_kmeans.joblib
 !models/environment_scaler.joblib
