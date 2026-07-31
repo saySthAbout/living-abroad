@@ -1,4 +1,7 @@
+import os
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from app.career_matching import get_career_similarity, top_occupation_matches
 
@@ -54,6 +57,12 @@ def test_top_occupation_matches_queries_scoped_to_country():
     assert matches == [{"code": "21232", "title": "Software developers and programmers", "similarity": 0.87}]
 
 
+@pytest.mark.skipif(
+    os.environ.get("CI") == "true",
+    reason="requires the occupations table pre-seeded with real embeddings "
+    "(notebooks/02_career_matching_embeddings.ipynb) — not available in the "
+    "ephemeral CI database",
+)
 def test_every_country_returns_matches_against_real_db():
     # Regression: pgvector's HNSW index is built across all countries
     # together (no per-country partition). At the default ef_search, a
