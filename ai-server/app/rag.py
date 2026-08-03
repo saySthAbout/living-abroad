@@ -1,15 +1,25 @@
-"""RAG policy chat (F-RAG-003~006). Retrieval is hybrid: pgvector cosine
-search (dense) and PostgreSQL full-text search (sparse, `simple` config)
-each produce a candidate list, fused via Reciprocal Rank Fusion (RRF) to
-pick the final candidates — this only reorders/expands which chunks are
-considered, the `similarity` field on each returned chunk is still the
-chunk's true dense cosine similarity, so SIMILARITY_THRESHOLD keeps its
-original meaning unchanged. Note: source documents are English-only
-(scraped from official gov sites), so the keyword half of the fusion only
-helps when a query shares literal English tokens (acronyms like "EOI",
-"CRS", proper nouns) with the correct document — it cannot bridge a
-fully-Korean question to English content the way the multilingual dense
-embeddings do.
+"""RAG policy chat (F-RAG-003~006). Retrieval is three-stage:
+
+1. Candidate generation — pgvector cosine search (dense) and PostgreSQL
+   full-text search (sparse, `simple` config) each produce a candidate
+   list, fused via Reciprocal Rank Fusion (RRF). Note: source documents
+   are English-only (scraped from official gov sites), so the keyword
+   half only helps when a query shares literal English tokens (acronyms
+   like "EOI", "CRS") with the correct document — it cannot bridge a
+   fully-Korean question to English content the way the multilingual
+   dense embeddings do.
+2. Reranking — a multilingual cross-encoder (BAAI/bge-reranker-v2-m3,
+   chosen specifically because it isn't English/Chinese-only like the
+   base bge-reranker models, so it can still score a Korean question
+   against English content) rescoring the RRF-fused candidate pool by
+   jointly encoding (question, chunk) pairs — this is what actually
+   discriminates topically-similar same-country documents that the
+   bi-encoder embeddings alone confuse.
+3. Threshold gate — the `similarity` field on each returned chunk is
+   still the chunk's true dense cosine similarity (not the RRF or
+   reranker score), so SIMILARITY_THRESHOLD keeps its original,
+   already-evaluated meaning unchanged; reranking only decides which
+   chunks make it into the top_k that gets threshold-checked.
 
 Generation uses a separate LLM reached via an OpenAI-compatible Chat
 Completions API — vLLM (Qwen3-8B-AWQ) in production, Ollama locally
@@ -29,7 +39,7 @@ os.environ.setdefault("HF_HUB_DISABLE_IMPLICIT_TOKEN", "1")
 
 from openai import APIError, OpenAI
 from pgvector.psycopg2 import register_vector
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import CrossEncoder, SentenceTransformer
 
 from app import config
 from app.career_matching import HNSW_EF_SEARCH
@@ -42,6 +52,11 @@ SIMILARITY_THRESHOLD = 0.78
 TOP_K = 5
 CANDIDATE_K = 20  # 하이브리드 융합(RRF) 전, 각 검색 방식(dense/keyword)에서 가져올 후보 수.
 RRF_K = 60  # Reciprocal Rank Fusion 상수 (통상적으로 쓰이는 값).
+
+# bge-reranker-base/large는 중국어+영어 전용이라 한국어 질의에는 못 쓴다 — v2-m3는
+# 다국어(100개+ 언어) 지원이라 한국어 질문 vs 영어 문서를 직접 비교할 수 있다.
+RERANKER_MODEL_NAME = "BAAI/bge-reranker-v2-m3"
+RERANK_POOL_SIZE = 10  # RRF 후보 중 재랭킹할 개수 (많을수록 느려짐).
 
 REFUSAL_ANSWER = "현재 등록된 공식 문서에서 근거를 찾지 못했습니다. 공식 기관 또는 전문가에게 확인해 주세요."
 LLM_UNAVAILABLE_ANSWER = "AI 답변 생성 서버에 일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."
@@ -56,6 +71,7 @@ SYSTEM_PROMPT = (
 )
 
 _model: SentenceTransformer | None = None
+_reranker: CrossEncoder | None = None
 _llm_client: OpenAI | None = None
 
 
@@ -64,6 +80,13 @@ def _get_model() -> SentenceTransformer:
     if _model is None:
         _model = SentenceTransformer(EMBEDDING_MODEL_NAME)
     return _model
+
+
+def _get_reranker() -> CrossEncoder:
+    global _reranker
+    if _reranker is None:
+        _reranker = CrossEncoder(RERANKER_MODEL_NAME, max_length=512)
+    return _reranker
 
 
 def _get_llm_client() -> OpenAI:
@@ -75,6 +98,7 @@ def _get_llm_client() -> OpenAI:
 
 def search_policy_chunks(country_code: str, question: str, top_k: int = TOP_K) -> list[dict]:
     query_embedding = _get_model().encode(f"query: {question}", normalize_embeddings=True)
+    pool_size = max(top_k, RERANK_POOL_SIZE)
 
     conn = get_connection()
     try:
@@ -136,10 +160,10 @@ def search_policy_chunks(country_code: str, question: str, top_k: int = TOP_K) -
                     "question": question,
                     "candidate_k": CANDIDATE_K,
                     "rrf_k": RRF_K,
-                    "top_k": top_k,
+                    "top_k": pool_size,
                 },
             )
-            return [
+            candidates = [
                 {
                     "chunkId": row[0],
                     "content": row[1],
@@ -152,6 +176,15 @@ def search_policy_chunks(country_code: str, question: str, top_k: int = TOP_K) -
             ]
     finally:
         conn.close()
+
+    if not candidates:
+        return []
+
+    # RRF로 뽑은 후보 풀을 cross-encoder로 재랭킹한다 — similarity(코사인 유사도)는
+    # 그대로 두고 순서/선택(top_k)만 재랭킹 점수 기준으로 바꾼다.
+    rerank_scores = _get_reranker().predict([(question, c["content"]) for c in candidates])
+    ranked = sorted(zip(candidates, rerank_scores), key=lambda pair: pair[1], reverse=True)
+    return [chunk for chunk, _ in ranked[:top_k]]
 
 
 def _build_user_prompt(question: str, chunks: list[dict]) -> str:

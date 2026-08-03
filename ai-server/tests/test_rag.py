@@ -35,8 +35,10 @@ def test_search_policy_chunks_uses_hybrid_dense_and_keyword_query():
 
     with patch("app.rag.get_connection", return_value=fake_conn), \
          patch("app.rag.register_vector"), \
-         patch("app.rag._get_model") as mock_get_model:
+         patch("app.rag._get_model") as mock_get_model, \
+         patch("app.rag._get_reranker") as mock_get_reranker:
         mock_get_model.return_value.encode.return_value = [0.0] * 768
+        mock_get_reranker.return_value.predict.return_value = [0.9]
 
         results = search_policy_chunks("CAN", "Express Entry 서류가 뭐야?", top_k=5)
 
@@ -48,7 +50,8 @@ def test_search_policy_chunks_uses_hybrid_dense_and_keyword_query():
     assert "rrf_score" in executed_sql
     assert executed_params["country"] == "CAN"
     assert executed_params["question"] == "Express Entry 서류가 뭐야?"
-    # similarity는 RRF 점수가 아니라 원래의 코사인 유사도여야 SIMILARITY_THRESHOLD 게이트 의미가 유지된다.
+    # similarity는 RRF 점수도 재랭킹 점수도 아니라 원래의 코사인 유사도여야
+    # SIMILARITY_THRESHOLD 게이트 의미가 유지된다.
     assert results == [
         {
             "chunkId": 1,
@@ -59,6 +62,33 @@ def test_search_policy_chunks_uses_hybrid_dense_and_keyword_query():
             "similarity": 0.87,
         }
     ]
+
+
+def test_search_policy_chunks_reorders_by_rerank_score_not_by_sql_order():
+    rows = [
+        (1, "content A", "Doc A", "https://example.gov/a", datetime(2026, 7, 19, tzinfo=timezone.utc), 0.90),
+        (2, "content B", "Doc B", "https://example.gov/b", datetime(2026, 7, 19, tzinfo=timezone.utc), 0.85),
+    ]
+    fake_cursor = MagicMock()
+    fake_cursor.fetchall.return_value = rows
+    fake_cursor.__enter__.return_value = fake_cursor
+    fake_conn = MagicMock()
+    fake_conn.cursor.return_value = fake_cursor
+
+    with patch("app.rag.get_connection", return_value=fake_conn), \
+         patch("app.rag.register_vector"), \
+         patch("app.rag._get_model") as mock_get_model, \
+         patch("app.rag._get_reranker") as mock_get_reranker:
+        mock_get_model.return_value.encode.return_value = [0.0] * 768
+        # SQL(RRF)은 A를 먼저 반환하지만, 재랭커는 B가 더 관련 있다고 판단한다.
+        mock_get_reranker.return_value.predict.return_value = [0.1, 0.95]
+
+        results = search_policy_chunks("CAN", "질문", top_k=2)
+
+    assert [c["chunkId"] for c in results] == [2, 1]
+    # similarity는 여전히 각 청크의 원래 코사인 유사도(재랭킹 순서와 무관).
+    assert results[0]["similarity"] == 0.85
+    assert results[1]["similarity"] == 0.90
 
 
 def test_answer_question_refuses_when_no_chunk_clears_threshold():
