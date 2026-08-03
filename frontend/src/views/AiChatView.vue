@@ -246,16 +246,17 @@ function startNewChat() {
           <div class="rounded-xl rounded-tl-none bg-soft-50 px-4 py-3 text-sm text-navy-950">
             <p class="whitespace-pre-line">{{ message.content }}</p>
             <div v-if="message.sources?.length" class="mt-3 space-y-1 border-t border-slate-200 pt-2">
-              <a
-                v-for="source in message.sources"
-                :key="source.url"
-                :href="source.url"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block text-xs font-medium text-navy-700 underline"
-              >
-                🔗 {{ source.title }}
-              </a>
+              <div v-for="source in message.sources" :key="source.url" class="flex flex-wrap items-baseline gap-x-2">
+                <a
+                  :href="source.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-xs font-medium text-navy-700 underline"
+                >
+                  🔗 {{ source.title }}
+                </a>
+                <span class="text-[11px] text-slate-400">{{ t('chat.sourceVerifiedAt', { date: source.verifiedAt }) }}</span>
+              </div>
             </div>
             <div class="mt-2 flex flex-wrap gap-2 text-[11px] text-slate-400">
               <span v-if="message.answerable === false" class="rounded bg-amber-50 px-1.5 py-0.5 text-amber-600">{{ t('chat.noEvidence') }}</span>

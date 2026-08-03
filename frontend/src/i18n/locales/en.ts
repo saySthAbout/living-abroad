@@ -201,6 +201,7 @@ export default {
     noHistory: 'No matching consultations found.',
     assistantName: '🤖 Living Abroad AI',
     noEvidence: 'No supporting document',
+    sourceVerifiedAt: 'As of: {date}',
     notLegalAdvice: 'This answer is not legal advice.',
     generating: 'Generating an answer…',
     inputPlaceholder: 'Ask anything about your immigration plans...',

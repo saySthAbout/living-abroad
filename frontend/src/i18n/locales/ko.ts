@@ -197,6 +197,7 @@ export default {
     noHistory: '일치하는 상담 기록이 없습니다.',
     assistantName: '🤖 Living Abroad AI',
     noEvidence: '근거 문서 없음',
+    sourceVerifiedAt: '기준일: {date}',
     notLegalAdvice: '본 답변은 법률 자문이 아닙니다.',
     generating: '답변을 생성하고 있습니다…',
     inputPlaceholder: '이주 계획에 대해 무엇이든 물어보세요...',
