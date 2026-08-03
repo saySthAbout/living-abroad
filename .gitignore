@@ -3,3 +3,6 @@ CLAUDE.md
 logs/
 .dev-pids
 backups/
+mlruns/
+mlflow.db
+mlartifacts/
