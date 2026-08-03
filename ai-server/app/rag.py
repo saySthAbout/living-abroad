@@ -1,10 +1,22 @@
-"""RAG policy chat (F-RAG-003~006). Retrieval uses the same pretrained
-Sentence Transformer as career matching (search-only role); generation
-uses a separate LLM reached via an OpenAI-compatible Chat Completions API
-— vLLM (Qwen3-8B-AWQ) in production, Ollama locally during development
-(see app/config.py). If no chunk clears SIMILARITY_THRESHOLD, the LLM is
-never called: the refusal is enforced at the retrieval gate, not just by
-prompt instruction, per the "don't guess" hard rule.
+"""RAG policy chat (F-RAG-003~006). Retrieval is hybrid: pgvector cosine
+search (dense) and PostgreSQL full-text search (sparse, `simple` config)
+each produce a candidate list, fused via Reciprocal Rank Fusion (RRF) to
+pick the final candidates — this only reorders/expands which chunks are
+considered, the `similarity` field on each returned chunk is still the
+chunk's true dense cosine similarity, so SIMILARITY_THRESHOLD keeps its
+original meaning unchanged. Note: source documents are English-only
+(scraped from official gov sites), so the keyword half of the fusion only
+helps when a query shares literal English tokens (acronyms like "EOI",
+"CRS", proper nouns) with the correct document — it cannot bridge a
+fully-Korean question to English content the way the multilingual dense
+embeddings do.
+
+Generation uses a separate LLM reached via an OpenAI-compatible Chat
+Completions API — vLLM (Qwen3-8B-AWQ) in production, Ollama locally
+during development (see app/config.py). If no chunk clears
+SIMILARITY_THRESHOLD, the LLM is never called: the refusal is enforced at
+the retrieval gate, not just by prompt instruction, per the "don't guess"
+hard rule.
 """
 
 from __future__ import annotations
@@ -28,6 +40,8 @@ logger = logging.getLogger(__name__)
 EMBEDDING_MODEL_NAME = "intfloat/multilingual-e5-base"
 SIMILARITY_THRESHOLD = 0.78
 TOP_K = 5
+CANDIDATE_K = 20  # 하이브리드 융합(RRF) 전, 각 검색 방식(dense/keyword)에서 가져올 후보 수.
+RRF_K = 60  # Reciprocal Rank Fusion 상수 (통상적으로 쓰이는 값).
 
 REFUSAL_ANSWER = "현재 등록된 공식 문서에서 근거를 찾지 못했습니다. 공식 기관 또는 전문가에게 확인해 주세요."
 LLM_UNAVAILABLE_ANSWER = "AI 답변 생성 서버에 일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."
@@ -69,20 +83,61 @@ def search_policy_chunks(country_code: str, question: str, top_k: int = TOP_K) -
             cursor.execute("SET hnsw.ef_search = %s", (HNSW_EF_SEARCH,))
             cursor.execute(
                 """
+                WITH dense AS (
+                    SELECT
+                        pc.chunk_id,
+                        ROW_NUMBER() OVER (ORDER BY pc.embedding <=> %(qvec)s) AS rnk
+                    FROM policy_chunks pc
+                    JOIN policy_documents pd ON pd.document_id = pc.document_id
+                    WHERE pd.country_code = %(country)s AND pc.embedding IS NOT NULL
+                    ORDER BY pc.embedding <=> %(qvec)s
+                    LIMIT %(candidate_k)s
+                ),
+                keyword AS (
+                    SELECT
+                        pc.chunk_id,
+                        ROW_NUMBER() OVER (
+                            ORDER BY ts_rank(pc.search_vector, plainto_tsquery('simple', %(question)s)) DESC
+                        ) AS rnk
+                    FROM policy_chunks pc
+                    JOIN policy_documents pd ON pd.document_id = pc.document_id
+                    WHERE pd.country_code = %(country)s
+                        AND pc.search_vector @@ plainto_tsquery('simple', %(question)s)
+                    ORDER BY ts_rank(pc.search_vector, plainto_tsquery('simple', %(question)s)) DESC
+                    LIMIT %(candidate_k)s
+                ),
+                fused AS (
+                    SELECT
+                        chunk_id,
+                        SUM(1.0 / (%(rrf_k)s + rnk)) AS rrf_score
+                    FROM (
+                        SELECT chunk_id, rnk FROM dense
+                        UNION ALL
+                        SELECT chunk_id, rnk FROM keyword
+                    ) AS candidates
+                    GROUP BY chunk_id
+                )
                 SELECT
                     pc.chunk_id,
                     pc.chunk_content,
                     pd.document_title,
                     pd.source_url,
                     pd.verified_at,
-                    1 - (pc.embedding <=> %s) AS similarity
-                FROM policy_chunks pc
+                    1 - (pc.embedding <=> %(qvec)s) AS similarity
+                FROM fused f
+                JOIN policy_chunks pc ON pc.chunk_id = f.chunk_id
                 JOIN policy_documents pd ON pd.document_id = pc.document_id
-                WHERE pd.country_code = %s AND pc.embedding IS NOT NULL
-                ORDER BY pc.embedding <=> %s
-                LIMIT %s
+                ORDER BY f.rrf_score DESC
+                LIMIT %(top_k)s
                 """,
-                (query_embedding, country_code, query_embedding, top_k),
+                {
+                    "qvec": query_embedding,
+                    "country": country_code,
+                    "question": question,
+                    "candidate_k": CANDIDATE_K,
+                    "rrf_k": RRF_K,
+                    "top_k": top_k,
+                },
             )
             return [
                 {

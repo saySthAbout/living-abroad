@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 from openai import APIError
 
-from app.rag import LLM_UNAVAILABLE_ANSWER, SIMILARITY_THRESHOLD, answer_question
+from app.rag import LLM_UNAVAILABLE_ANSWER, SIMILARITY_THRESHOLD, answer_question, search_policy_chunks
 
 
 def _fake_chunk(similarity: float, chunk_id: int = 1) -> dict:
@@ -14,6 +15,50 @@ def _fake_chunk(similarity: float, chunk_id: int = 1) -> dict:
         "verifiedAt": "2026-07-19",
         "similarity": similarity,
     }
+
+
+def test_search_policy_chunks_uses_hybrid_dense_and_keyword_query():
+    fake_cursor = MagicMock()
+    fake_cursor.fetchall.return_value = [
+        (
+            1,
+            "some official policy text",
+            "Some Official Document",
+            "https://example.gov/doc",
+            datetime(2026, 7, 19, tzinfo=timezone.utc),
+            0.87,
+        )
+    ]
+    fake_cursor.__enter__.return_value = fake_cursor
+    fake_conn = MagicMock()
+    fake_conn.cursor.return_value = fake_cursor
+
+    with patch("app.rag.get_connection", return_value=fake_conn), \
+         patch("app.rag.register_vector"), \
+         patch("app.rag._get_model") as mock_get_model:
+        mock_get_model.return_value.encode.return_value = [0.0] * 768
+
+        results = search_policy_chunks("CAN", "Express Entry 서류가 뭐야?", top_k=5)
+
+    executed_sql, executed_params = fake_cursor.execute.call_args[0]
+    # dense(벡터) + keyword(전문검색) 두 후보 집합을 RRF로 합치는 하이브리드 쿼리인지 확인.
+    assert "search_vector" in executed_sql
+    assert "plainto_tsquery" in executed_sql
+    assert "pc.embedding <=>" in executed_sql
+    assert "rrf_score" in executed_sql
+    assert executed_params["country"] == "CAN"
+    assert executed_params["question"] == "Express Entry 서류가 뭐야?"
+    # similarity는 RRF 점수가 아니라 원래의 코사인 유사도여야 SIMILARITY_THRESHOLD 게이트 의미가 유지된다.
+    assert results == [
+        {
+            "chunkId": 1,
+            "content": "some official policy text",
+            "title": "Some Official Document",
+            "url": "https://example.gov/doc",
+            "verifiedAt": "2026-07-19",
+            "similarity": 0.87,
+        }
+    ]
 
 
 def test_answer_question_refuses_when_no_chunk_clears_threshold():
