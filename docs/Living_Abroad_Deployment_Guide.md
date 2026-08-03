@@ -97,3 +97,33 @@ Pod 방식(상시 과금)이 아니라 **Serverless Endpoint**(유휴 시 워커
 - `.env`를 GCP 콘솔 브라우저 SSH에서 `nano`로 수정했다면, 저장 직후 `grep <key> .env`로 실제 반영됐는지 다시 확인할 것 — `Ctrl+O`가 저장된 것처럼 보여도 반영이 안 된 적이 최소 두 번 있었다.
 - HTTPS 인증서 만료일을 캘린더에 남겨두고, 만료 전 갱신 + nginx 재시작을 잊지 말 것.
 - Google 로그인을 쓴다면 Google Cloud Console의 OAuth 클라이언트에 배포 도메인(`https://<ip>.sslip.io` 등)을 **승인된 자바스크립트 원본**으로 등록해야 한다 — 값 자체가 맞아도 원본 등록이 안 되면 `400 origin_mismatch`로 막힌다. 이건 자동화 브라우저로는 재현이 안 되고 실사용자가 직접 눌러봐야 확인 가능하다.
+
+## 7. 백업 및 복구
+
+DB 볼륨(`living_abroad_db_data`) 스냅샷 대신 `pg_dump` 논리 백업을 쓴다 — 볼륨을 그대로 복사하면
+pgvector 확장·PostgreSQL 버전이 조금만 달라져도 복원이 깨질 수 있는데, `pg_dump`/`pg_restore`는
+그 경계를 SQL 레벨에서 처리해줘서 더 안전하다.
+
+**백업 (수동 실행)**
+```bash
+./scripts/backup-db.sh
+```
+`backups/living_abroad_<타임스탬프>.dump`에 저장되고, 14일이 지난 백업은 자동 삭제된다.
+
+**정기 백업 (cron, VM에서 한 번만 등록)**
+```bash
+crontab -e
+# 매일 새벽 3시 백업
+0 3 * * * cd /home/saysthabout/living-abroad && ./scripts/backup-db.sh >> logs/backup.log 2>&1
+```
+
+**복구**
+```bash
+./scripts/restore-db.sh backups/living_abroad_20260803_030000.dump
+```
+`backend`/`ai-server` 컨테이너를 잠깐 멈추고 `pg_restore --clean`으로 기존 데이터를 덮어쓴 뒤
+재기동한다 — 되돌릴 수 없는 작업이므로 실행 전 확인 프롬프트가 뜬다.
+
+백업 파일은 운영 DB 전체(사용자 이메일 등 개인정보 포함)이므로 `backups/`는 git에 커밋하지 않는다
+(`.gitignore`에 등록됨). 필요 시 별도로 암호화해 오프-VM 저장소(GCS 등)에 옮기는 것을 권장한다 —
+현재는 VM 로컬 디스크에만 보관되므로, VM 자체가 유실되면 백업도 함께 유실된다는 한계가 있다.
