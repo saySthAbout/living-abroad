@@ -17,3 +17,9 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_API_BASE_URL = os.environ.get("LLM_API_BASE_URL", "http://localhost:11434/v1")
 LLM_MODEL_NAME = os.environ.get("LLM_MODEL_NAME", "gemma2:latest")
+
+# 비워두면 로컬 CPU에서 sentence-transformers CrossEncoder로 재랭킹한다.
+# 채우면 RunPod 등 GPU로 서빙되는 HuggingFace TEI(text-embeddings-inference)
+# /rerank 엔드포인트를 호출한다 (LLM과 동일하게 dev=로컬, prod=GPU 패턴).
+RERANKER_API_KEY = os.environ.get("RERANKER_API_KEY", "")
+RERANKER_API_BASE_URL = os.environ.get("RERANKER_API_BASE_URL", "")

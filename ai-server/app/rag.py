@@ -14,7 +14,12 @@
    against English content) rescoring the RRF-fused candidate pool by
    jointly encoding (question, chunk) pairs — this is what actually
    discriminates topically-similar same-country documents that the
-   bi-encoder embeddings alone confuse.
+   bi-encoder embeddings alone confuse. Runs locally on CPU
+   (sentence-transformers CrossEncoder) unless RERANKER_API_BASE_URL is
+   set, in which case it calls a GPU-hosted HuggingFace TEI /rerank
+   endpoint instead (see app/config.py) — same dev=local/prod=GPU
+   pattern as the LLM client. If that call fails, reranking is skipped
+   and the RRF order is used as-is rather than failing the request.
 3. Threshold gate — the `similarity` field on each returned chunk is
    still the chunk's true dense cosine similarity (not the RRF or
    reranker score), so SIMILARITY_THRESHOLD keeps its original,
@@ -37,6 +42,7 @@ import re
 
 os.environ.setdefault("HF_HUB_DISABLE_IMPLICIT_TOKEN", "1")
 
+import httpx
 from openai import APIError, OpenAI
 from pgvector.psycopg2 import register_vector
 from sentence_transformers import CrossEncoder, SentenceTransformer
@@ -87,6 +93,36 @@ def _get_reranker() -> CrossEncoder:
     if _reranker is None:
         _reranker = CrossEncoder(RERANKER_MODEL_NAME, max_length=512)
     return _reranker
+
+
+def _rerank_via_api(question: str, texts: list[str]) -> list[float]:
+    """RunPod 등에 GPU로 띄운 HuggingFace TEI(text-embeddings-inference)의
+    /rerank 엔드포인트를 호출한다. 콜드스타트를 감안해 넉넉한 타임아웃을 둔다
+    (vLLM 콜드스타트와 동일한 이유, docs/Living_Abroad_Deployment_Guide.md 참고)."""
+    headers = {"Authorization": f"Bearer {config.RERANKER_API_KEY}"} if config.RERANKER_API_KEY else {}
+    response = httpx.post(
+        f"{config.RERANKER_API_BASE_URL.rstrip('/')}/rerank",
+        headers=headers,
+        json={"query": question, "texts": texts},
+        timeout=60.0,
+    )
+    response.raise_for_status()
+    scores_by_index = {item["index"]: item["score"] for item in response.json()}
+    return [scores_by_index[i] for i in range(len(texts))]
+
+
+def _rerank(question: str, candidates: list[dict]) -> list[dict]:
+    texts = [c["content"] for c in candidates]
+    if config.RERANKER_API_BASE_URL:
+        try:
+            scores = _rerank_via_api(question, texts)
+        except httpx.HTTPError:
+            logger.exception("재랭커 API 호출 실패 — RRF 순위를 그대로 사용한다")
+            return candidates
+    else:
+        scores = list(_get_reranker().predict([(question, t) for t in texts]))
+    ranked = sorted(zip(candidates, scores), key=lambda pair: pair[1], reverse=True)
+    return [chunk for chunk, _ in ranked]
 
 
 def _get_llm_client() -> OpenAI:
@@ -180,11 +216,9 @@ def search_policy_chunks(country_code: str, question: str, top_k: int = TOP_K) -
     if not candidates:
         return []
 
-    # RRF로 뽑은 후보 풀을 cross-encoder로 재랭킹한다 — similarity(코사인 유사도)는
-    # 그대로 두고 순서/선택(top_k)만 재랭킹 점수 기준으로 바꾼다.
-    rerank_scores = _get_reranker().predict([(question, c["content"]) for c in candidates])
-    ranked = sorted(zip(candidates, rerank_scores), key=lambda pair: pair[1], reverse=True)
-    return [chunk for chunk, _ in ranked[:top_k]]
+    # RRF로 뽑은 후보 풀을 재랭킹한다 — similarity(코사인 유사도)는 그대로 두고
+    # 순서/선택(top_k)만 재랭킹 점수 기준으로 바꾼다.
+    return _rerank(question, candidates)[:top_k]
 
 
 def _build_user_prompt(question: str, chunks: list[dict]) -> str:

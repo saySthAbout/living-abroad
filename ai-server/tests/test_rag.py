@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
+import httpx
 from openai import APIError
 
-from app.rag import LLM_UNAVAILABLE_ANSWER, SIMILARITY_THRESHOLD, answer_question, search_policy_chunks
+from app import config
+from app.rag import LLM_UNAVAILABLE_ANSWER, SIMILARITY_THRESHOLD, _rerank, answer_question, search_policy_chunks
 
 
 def _fake_chunk(similarity: float, chunk_id: int = 1) -> dict:
@@ -89,6 +91,39 @@ def test_search_policy_chunks_reorders_by_rerank_score_not_by_sql_order():
     # similarity는 여전히 각 청크의 원래 코사인 유사도(재랭킹 순서와 무관).
     assert results[0]["similarity"] == 0.85
     assert results[1]["similarity"] == 0.90
+
+
+def test_rerank_uses_api_when_reranker_api_base_url_configured():
+    candidates = [_fake_chunk(0.9, chunk_id=1), _fake_chunk(0.85, chunk_id=2)]
+    fake_response = MagicMock()
+    fake_response.json.return_value = [{"index": 0, "score": 0.1}, {"index": 1, "score": 0.95}]
+
+    with patch.object(config, "RERANKER_API_BASE_URL", "https://example-runpod.net"), \
+         patch.object(config, "RERANKER_API_KEY", "test-key"), \
+         patch("app.rag.httpx.post", return_value=fake_response) as mock_post, \
+         patch("app.rag._get_reranker") as mock_get_reranker:
+        result = _rerank("질문", candidates)
+
+    # 로컬 CPU 모델은 전혀 호출되지 않아야 한다 — API가 설정되면 API만 쓴다.
+    mock_get_reranker.assert_not_called()
+    call_kwargs = mock_post.call_args.kwargs
+    assert mock_post.call_args.args[0] == "https://example-runpod.net/rerank"
+    assert call_kwargs["headers"] == {"Authorization": "Bearer test-key"}
+    assert call_kwargs["json"] == {"query": "질문", "texts": ["some official policy text", "some official policy text"]}
+    assert [c["chunkId"] for c in result] == [2, 1]
+
+
+def test_rerank_falls_back_to_rrf_order_when_api_call_fails():
+    candidates = [_fake_chunk(0.9, chunk_id=1), _fake_chunk(0.85, chunk_id=2)]
+
+    with patch.object(config, "RERANKER_API_BASE_URL", "https://example-runpod.net"), \
+         patch("app.rag.httpx.post", side_effect=httpx.ConnectError("connection failed")), \
+         patch("app.rag._get_reranker") as mock_get_reranker:
+        result = _rerank("질문", candidates)
+
+    mock_get_reranker.assert_not_called()
+    # 재랭킹 실패 시 원래 RRF 순서를 그대로 유지한다 (요청 자체는 실패하지 않는다).
+    assert [c["chunkId"] for c in result] == [1, 2]
 
 
 def test_answer_question_refuses_when_no_chunk_clears_threshold():
