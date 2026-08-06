@@ -25,14 +25,52 @@
 
 ## 기술 스택
 
-| 영역 | 스택 |
-|---|---|
-| 프론트엔드 | Vue 3.5 + Vite + TypeScript + Pinia + Vue Router + Tailwind CSS v4 |
-| 백엔드 | Spring Boot 4.1 (Java 21) + Spring Security(JWT) + Spring Data JPA + Flyway |
-| AI 서버 | FastAPI + scikit-learn(K-Means) + Sentence Transformers + psycopg2 |
-| 데이터베이스 | PostgreSQL 16/18 + pgvector |
-| LLM | 자체 호스팅 vLLM + `Qwen/Qwen3-8B-AWQ` (로컬 개발 시 Ollama로 대체 가능) |
-| 배포 | Docker Compose (Vue/Spring/FastAPI/Postgres/Nginx) — GCP Compute Engine + RunPod GPU |
+**Frontend**
+
+![Vue.js](https://img.shields.io/badge/Vue.js_3.5-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite_8-646CFF?style=flat-square&logo=vite&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript_6-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Pinia](https://img.shields.io/badge/Pinia_3-FFD859?style=flat-square&logo=pinia&logoColor=black)
+![Vue Router](https://img.shields.io/badge/Vue_Router_5-4FC08D?style=flat-square&logo=vuedotjs&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest_4-6E9F18?style=flat-square&logo=vitest&logoColor=white)
+
+**Backend**
+
+![Java](https://img.shields.io/badge/Java_17-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot_4.1-6DB33F?style=flat-square&logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)
+![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=flat-square&logo=spring&logoColor=white)
+![Flyway](https://img.shields.io/badge/Flyway-CC0200?style=flat-square&logo=flyway&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle_9-02303A?style=flat-square&logo=gradle&logoColor=white)
+
+**AI 서버**
+
+![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI_0.139-009688?style=flat-square&logo=fastapi&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn_1.9-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch_2.13-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
+![Sentence Transformers](https://img.shields.io/badge/Sentence_Transformers_5.6-FFCE00?style=flat-square&logo=huggingface&logoColor=black)
+![Pandas](https://img.shields.io/badge/Pandas_3.0-150458?style=flat-square&logo=pandas&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy_2.5-013243?style=flat-square&logo=numpy&logoColor=white)
+
+**데이터베이스 & LLM**
+
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![pgvector](https://img.shields.io/badge/pgvector_0.8-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![vLLM](https://img.shields.io/badge/vLLM-000000?style=flat-square&logo=vllm&logoColor=white)
+![Qwen](https://img.shields.io/badge/Qwen3--8B--AWQ-6236FF?style=flat-square)
+![Ollama](https://img.shields.io/badge/Ollama_(local_dev)-000000?style=flat-square&logo=ollama&logoColor=white)
+
+**인프라 & 배포**
+
+![Docker](https://img.shields.io/badge/Docker_Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx_1.30-009639?style=flat-square&logo=nginx&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/GCP_Compute_Engine-4285F4?style=flat-square&logo=googlecloud&logoColor=white)
+![RunPod](https://img.shields.io/badge/RunPod_GPU-6B21A8?style=flat-square)
+![Let's Encrypt](https://img.shields.io/badge/Let's_Encrypt_(certbot)-003A70?style=flat-square&logo=letsencrypt&logoColor=white)
+![Sentry](https://img.shields.io/badge/Sentry-362D59?style=flat-square&logo=sentry&logoColor=white)
 
 버전 상세: [docs/Living_Abroad_Tech_Stack_Versions.md](docs/Living_Abroad_Tech_Stack_Versions.md)
 
